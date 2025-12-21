@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/projeto-link-direto/sw.js', { scope: '/projeto-link-direto/' })})}
