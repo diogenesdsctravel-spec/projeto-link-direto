@@ -1,0 +1,23 @@
+/**
+ * SUPABASE CLIENT
+ * 
+ * Conexão com o banco de dados Supabase
+ */
+
+import { createClient } from "@supabase/supabase-js"
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("⚠️ Supabase não configurado. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no .env.local")
+}
+
+export const supabase = createClient(
+    supabaseUrl || "https://placeholder.supabase.co",
+    supabaseAnonKey || "placeholder-key"
+)
+
+export function isSupabaseConfigured(): boolean {
+    return !!(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes("placeholder"))
+}

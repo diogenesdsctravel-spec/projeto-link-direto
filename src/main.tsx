@@ -1,10 +1,12 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { TesteCotacaoIsolado } from "./pages/TesteCotacaoIsolado";
-import "./main.css";
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"
+import App from "./App"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <TesteCotacaoIsolado />
-  </React.StrictMode>,
-);
+    <BrowserRouter basename="/projeto-link-direto">
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
+)

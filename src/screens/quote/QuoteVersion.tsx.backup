@@ -1,0 +1,248 @@
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useParams } from "react-router-dom"
+import IncludedBadge from "../../components/IncludedBadge"
+import HotelCarousel from "../../components/HotelCarousel"
+import { repositories } from "../../services/repositories"
+import type { QuoteVersion } from "../../types/quoteVersion"
+import type { DestinationTemplate, ScreenTemplate, IncludedStatus } from "../../types/destinationTemplate"
+
+export default function QuoteVersion() {
+    const { publicId = "", versionId = "" } = useParams()
+    const [quote, setQuote] = useState<QuoteVersion | null>(null)
+    const [template, setTemplate] = useState<DestinationTemplate | null>(null)
+    const [screenIndex, setScreenIndex] = useState(0)
+    const [loading, setLoading] = useState(true)
+    const [anim, setAnim] = useState<null | "up" | "down">(null)
+
+    const startYRef = useRef<number | null>(null)
+    const scrollRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        setLoading(true)
+
+        repositories.quoteVersionRepository
+            .getVersion(publicId, versionId)
+            .then((v) => {
+                setQuote(v)
+                if (!v) return null
+                return repositories.destinationTemplateRepository.getByDestinationKey(v.destinationKey)
+            })
+            .then((t) => {
+                setTemplate(t)
+            })
+            .finally(() => setLoading(false))
+    }, [publicId, versionId])
+
+    useEffect(() => {
+        if (!scrollRef.current) return
+        scrollRef.current.scrollTo({ top: 0 })
+    }, [screenIndex])
+
+    const screens: ScreenTemplate[] = useMemo(() => {
+        return template?.screens ?? []
+    }, [template])
+
+    useEffect(() => {
+        function onKeyDown(e: KeyboardEvent) {
+            if (!screens.length) return
+
+            if (e.key === "ArrowLeft") {
+                setScreenIndex((x) => Math.max(0, x - 1))
+            }
+
+            if (e.key === "ArrowRight") {
+                setScreenIndex((x) => Math.min(screens.length - 1, x + 1))
+            }
+        }
+
+        window.addEventListener("keydown", onKeyDown)
+        return () => window.removeEventListener("keydown", onKeyDown)
+    }, [screens.length])
+
+    const current = screens[screenIndex]
+
+
+    if (loading) {
+        return <div style={{ padding: 24 }}>Carregando…</div>
+    }
+
+    if (!quote || !template) {
+        return <div style={{ padding: 24 }}>Não foi possível carregar a cotação.</div>
+    }
+
+    return (
+        <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
+            <div style={{ color: "#6b7280", fontSize: 13 }}>
+                {quote.clientName} · {template.destinationName}
+            </div>
+
+            <div style={{ marginTop: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: 13, color: "#111827", fontWeight: 700 }}>{quote.label}</div>
+            </div>
+
+            <div style={{ marginTop: 10, display: "flex", gap: 6, alignItems: "center" }}>
+                {screens.map((_, idx) => (
+                    <div
+                        key={idx}
+                        style={{
+                            width: idx === screenIndex ? 18 : 6,
+                            height: 6,
+                            borderRadius: 999,
+                            background: idx === screenIndex ? "#111827" : "#e5e7eb",
+                            transition: "width 180ms ease",
+                        }}
+                    />
+                ))}
+            </div>
+
+            <div
+                ref={scrollRef}
+                style={{
+                    marginTop: 16,
+                    padding: 16,
+                    borderRadius: 16,
+                    border: "1px solid #e5e7eb",
+                    maxHeight: "70vh",
+                    overflowY: "auto",
+                    transition: "transform 180ms ease, opacity 180ms ease",
+                    willChange: "transform, opacity",
+                    transform: anim === "up" ? "translateY(-10px)" : anim === "down" ? "translateY(10px)" : "translateY(0px)",
+                    opacity: anim ? 0.55 : 1,
+                }}
+                onTouchStart={(e) => {
+                    startYRef.current = e.touches[0]?.clientY ?? null
+                }}
+                onTouchEnd={(e) => {
+                    const startY = startYRef.current
+                    const endY = e.changedTouches[0]?.clientY ?? null
+                    startYRef.current = null
+                    if (startY === null || endY === null) return
+
+                    const deltaY = endY - startY
+                    const threshold = 80
+
+                    if (deltaY <= -threshold) {
+                        setAnim("up")
+                        window.setTimeout(() => {
+                            setScreenIndex((x) => Math.min(screens.length - 1, x + 1))
+                            setAnim(null)
+                        }, 160)
+                    }
+
+                    if (deltaY >= threshold) {
+                        setAnim("down")
+                        window.setTimeout(() => {
+                            setScreenIndex((x) => Math.max(0, x - 1))
+                            setAnim(null)
+                        }, 160)
+                    }
+                }}
+            >
+                {!current ? (
+                    <div>Nenhuma tela disponível.</div>
+                ) : (
+                    <>
+                        {current.type === "hero" ? (
+                            <div>
+                                {current.imageUrl ? (
+                                    <div style={{ borderRadius: 18, overflow: "hidden" }}>
+                                        <img
+                                            src={current.imageUrl}
+                                            alt=""
+                                            style={{ width: "100%", height: 360, objectFit: "cover", display: "block" }}
+                                        />
+                                    </div>
+                                ) : null}
+
+                                <div style={{ marginTop: 14 }}>
+                                    <div style={{ fontSize: 12, letterSpacing: 1.6, color: "#6b7280", textTransform: "uppercase" }}>
+                                        DSC Travel
+                                    </div>
+
+                                    <div style={{ marginTop: 8, fontWeight: 800, fontSize: 24, lineHeight: 1.15 }}>{current.title ?? ""}</div>
+
+                                    {current.subtitle ? (
+                                        <div style={{ marginTop: 10, color: "#6b7280", fontSize: 15, lineHeight: 1.45 }}>
+                                            {current.subtitle}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: 18 }}>{current.title ?? "(sem título)"}</div>
+                                <div style={{ marginTop: 6, color: "#6b7280" }}>{current.subtitle ?? ""}</div>
+
+                                {current.includedStatus ? (
+                                    <div style={{ marginTop: 10 }}>
+                                        <IncludedBadge status={current.includedStatus!} />
+                                    </div>
+                                ) : null}
+
+                                {current.imageUrl ? (
+                                    <div style={{ marginTop: 12 }}>
+                                        <img
+                                            src={current.imageUrl}
+                                            alt=""
+                                            style={{ width: "100%", height: 260, objectFit: "cover", borderRadius: 14 }}
+                                        />
+                                    </div>
+                                ) : null}
+
+                                {current.type === "hotel" && current.hotelCarouselImageUrls?.length ? (
+                                    <HotelCarousel imageUrls={current.hotelCarouselImageUrls} />
+                                ) : null}
+
+                                {current.type === "experiences" && current.experienceItems?.length ? (
+                                    <div style={{ marginTop: 14 }}>
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                            {current.experienceItems.slice(0, 6).map((e) => (
+                                                <div
+                                                    key={e.experienceId}
+                                                    style={{
+                                                        padding: 14,
+                                                        borderRadius: 16,
+                                                        border: "1px solid #e5e7eb",
+                                                        background: "#ffffff",
+                                                    }}
+                                                >
+                                                    <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>{e.title}</div>
+                                                    {e.subtitle ? (
+                                                        <div style={{ marginTop: 6, fontSize: 12, color: "#6b7280", lineHeight: 1.35 }}>
+                                                            {e.subtitle}
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div style={{ marginTop: 12, fontSize: 12, color: "#6b7280" }}>
+                                            Role para ver detalhes e arraste para avançar.
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {screenIndex < Math.min(2, screens.length - 1) ? (
+                <div
+                    style={{
+                        marginTop: 14,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 8,
+                        color: "#6b7280",
+                        fontSize: 12,
+                    }}
+                >
+                    <div style={{ width: 46, height: 5, borderRadius: 999, background: "#e5e7eb" }} />
+                    <div>Arraste para cima</div>
+                </div>
+            ) : null}
+        </div>
+    )
+}
