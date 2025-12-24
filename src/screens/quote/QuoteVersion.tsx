@@ -8,15 +8,6 @@ import { getAgencyProfile, type AgencyProfile } from "../../services/agencyServi
 import IncludedBadge from "../../components/IncludedBadge"
 import HotelCarousel from "../../components/HotelCarousel"
 
-/**
- * QUOTE VERSION - COM AGENCY BRIEF
- * 
- * Estrutura:
- * - 3 telas do brief da DSC (conexão, estrutura, confiança)
- * - N telas do destino (hero, hotel, experiências, voos, resumo)
- */
-
-// Número de telas do brief
 const BRIEF_SCREENS_COUNT = 3
 
 export default function QuoteVersion() {
@@ -40,7 +31,6 @@ export default function QuoteVersion() {
         setError("")
 
         try {
-            // Carregar agência e cotação em paralelo
             const [agencyData, foundQuote] = await Promise.all([
                 getAgencyProfile(),
                 quoteRepository.getByPublicId(publicId)
@@ -49,35 +39,30 @@ export default function QuoteVersion() {
             setAgency(agencyData)
 
             if (foundQuote) {
-                console.log("✅ Cotação encontrada:", foundQuote)
                 setQuote(foundQuote)
 
-                // Verificar se tem dados extraídos
                 if (hasExtractedData(foundQuote)) {
-                    console.log("✨ Gerando template dinâmico")
                     const dynamicTemplate = await generateDynamicTemplateAsync(
                         foundQuote.clientName,
                         (foundQuote as any).extractedData
                     )
                     setTemplate(dynamicTemplate)
                 } else {
-                    console.log("📦 Usando template padrão")
-                    const mockTemplate = await repositories.destinationTemplateRepository.getByDestinationKey(foundQuote.destinationKey)
+                    const mockTemplate = await repositories.destinationTemplateRepository.getByDestinationKey(
+                        foundQuote.destinationKey
+                    )
                     setTemplate(mockTemplate)
                 }
             } else {
-                console.warn("❌ Cotação não encontrada")
                 setError("Cotação não encontrada")
             }
         } catch (err) {
-            console.error("Erro:", err)
             setError("Erro ao carregar cotação")
         }
 
         setLoading(false)
     }
 
-    // Scroll snap handler
     useEffect(() => {
         const container = containerRef.current
         if (!container) return
@@ -96,19 +81,20 @@ export default function QuoteVersion() {
     if (loading) {
         return (
             <div style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontFamily: "system-ui",
-                background: "#09077d"
+                background: "rgb(9, 7, 125)"
             }}>
                 <div style={{ textAlign: "center" }}>
                     <div style={{
                         width: 40,
                         height: 40,
                         border: "3px solid rgba(255,255,255,0.2)",
-                        borderTopColor: "#50cfad",
+                        borderTopColor: "rgb(80, 207, 173)",
                         borderRadius: "50%",
                         animation: "spin 1s linear infinite",
                         margin: "0 auto"
@@ -137,13 +123,13 @@ export default function QuoteVersion() {
         <div
             ref={containerRef}
             style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 overflowY: "scroll",
                 scrollSnapType: "y mandatory",
                 scrollBehavior: "smooth",
             }}
         >
-            {/* BRIEF: 3 TELAS DA DSC */}
             <BriefScreen1
                 agency={agency}
                 clientName={quote.clientName}
@@ -161,7 +147,6 @@ export default function QuoteVersion() {
                 total={totalScreens}
             />
 
-            {/* DESTINO: N TELAS */}
             {destinationScreens.map((screen, index) => (
                 <ScreenView
                     key={screen.screenId}
@@ -175,9 +160,6 @@ export default function QuoteVersion() {
     )
 }
 
-/**
- * BRIEF TELA 1: CONEXÃO PESSOAL
- */
 function BriefScreen1({
     agency,
     clientName,
@@ -192,135 +174,84 @@ function BriefScreen1({
     return (
         <div
             style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 scrollSnapAlign: "start",
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
+                overflow: "hidden",
+                background: "rgb(255, 255, 255)",
             }}
         >
-            {/* Background */}
-            {agency.ownerPhotoUrl ? (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundImage: `url(${agency.ownerPhotoUrl})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center top",
-                        zIndex: 0,
-                    }}
-                >
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: `linear-gradient(to bottom, 
-                                rgba(9, 7, 125, 0.2) 0%, 
-                                rgba(9, 7, 125, 0.6) 50%,
-                                rgba(9, 7, 125, 0.95) 100%)`,
-                        }}
-                    />
-                </div>
-            ) : (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: agency.colorPrimary,
-                        zIndex: 0,
-                    }}
-                />
-            )}
-
-            {/* Pagination */}
             <Pagination index={index} total={total} />
 
-            {/* Conteúdo */}
             <div
                 style={{
-                    position: "relative",
-                    zIndex: 1,
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    padding: 24,
-                    paddingBottom: 80,
+                    height: "clamp(360px, 68dvh, 540px)",
+                    backgroundImage: agency.ownerPhotoUrl ? `url(${agency.ownerPhotoUrl})` : undefined,
+                    backgroundColor: agency.ownerPhotoUrl ? undefined : "rgb(229, 231, 235)",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center 30%",
+                    flexShrink: 0,
+                }}
+            />
+
+            <div
+                style={{
+                    flexShrink: 0,
+                    paddingTop: 22,
+                    paddingLeft: 24,
+                    paddingRight: 24,
+                    paddingBottom: "calc(22px + env(safe-area-inset-bottom))",
+                    background: "rgb(255, 255, 255)",
                 }}
             >
                 <h1
                     style={{
                         margin: 0,
-                        fontSize: 38,
-                        fontWeight: 900,
-                        color: "#ffffff",
-                        lineHeight: 1.1,
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color: "rgb(17, 24, 39)",
+                        lineHeight: 1.25,
                     }}
                 >
-                    Olá, {clientName}!
+                    Cuidamos de cada detalhe por você
                 </h1>
 
                 <p
                     style={{
                         margin: 0,
-                        marginTop: 20,
-                        fontSize: 19,
-                        color: "rgba(255,255,255,0.95)",
+                        marginTop: 12,
+                        fontSize: 17,
+                        color: "rgb(107, 114, 128)",
                         lineHeight: 1.5,
                     }}
                 >
-                    Sou {agency.ownerName}, da {agency.agencyName}.
+                    Um especialista da DSC Travel acompanha sua viagem do início ao fim.
                 </p>
 
-                <p
+                <button
                     style={{
-                        margin: 0,
-                        marginTop: 8,
-                        fontSize: 19,
-                        color: "rgba(255,255,255,0.9)",
-                        lineHeight: 1.5,
+                        marginTop: 18,
+                        width: "100%",
+                        padding: "18px 24px",
+                        borderRadius: 18,
+                        border: "none",
+                        background: "rgb(80, 207, 173)",
+                        color: "rgb(9, 7, 125)",
+                        fontSize: 16,
+                        fontWeight: 800,
+                        cursor: "pointer",
                     }}
                 >
-                    {agency.welcomeText}
-                </p>
-
-                <div
-                    style={{
-                        marginTop: 28,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                    }}
-                >
-                    <span style={{ fontSize: 16 }}>📍</span>
-                    <span style={{
-                        fontSize: 15,
-                        color: "rgba(255,255,255,0.7)",
-                        fontWeight: 500,
-                    }}>
-                        {agency.city}
-                    </span>
-                </div>
+                    Conhecer meu roteiro
+                </button>
             </div>
-
-            <ScrollHint />
         </div>
     )
 }
 
-/**
- * BRIEF TELA 2: ESTRUTURA
- */
 function BriefScreen2({
     agency,
     index,
@@ -335,14 +266,14 @@ function BriefScreen2({
     return (
         <div
             style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 scrollSnapAlign: "start",
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
             }}
         >
-            {/* Background */}
             {backgroundUrl ? (
                 <div
                     style={{
@@ -364,8 +295,8 @@ function BriefScreen2({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: `linear-gradient(to bottom, 
-                                rgba(9, 7, 125, 0.3) 0%, 
+                            background: `linear-gradient(to bottom,
+                                rgba(9, 7, 125, 0.3) 0%,
                                 rgba(9, 7, 125, 0.7) 50%,
                                 rgba(9, 7, 125, 0.98) 100%)`,
                         }}
@@ -385,10 +316,8 @@ function BriefScreen2({
                 />
             )}
 
-            {/* Pagination */}
             <Pagination index={index} total={total} />
 
-            {/* Conteúdo */}
             <div
                 style={{
                     position: "relative",
@@ -406,7 +335,7 @@ function BriefScreen2({
                         margin: 0,
                         fontSize: 28,
                         fontWeight: 900,
-                        color: "#ffffff",
+                        color: "rgb(255, 255, 255)",
                         lineHeight: 1.2,
                     }}
                 >
@@ -456,9 +385,6 @@ function BriefScreen2({
     )
 }
 
-/**
- * BRIEF TELA 3: PROVA SOCIAL
- */
 function BriefScreen3({
     agency,
     index,
@@ -471,14 +397,14 @@ function BriefScreen3({
     return (
         <div
             style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 scrollSnapAlign: "start",
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
             }}
         >
-            {/* Background */}
             {agency.ownerServingPhotoUrl ? (
                 <div
                     style={{
@@ -500,8 +426,8 @@ function BriefScreen3({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: `linear-gradient(to bottom, 
-                                rgba(9, 7, 125, 0.3) 0%, 
+                            background: `linear-gradient(to bottom,
+                                rgba(9, 7, 125, 0.3) 0%,
                                 rgba(9, 7, 125, 0.75) 50%,
                                 rgba(9, 7, 125, 0.98) 100%)`,
                         }}
@@ -521,10 +447,8 @@ function BriefScreen3({
                 />
             )}
 
-            {/* Pagination */}
             <Pagination index={index} total={total} />
 
-            {/* Conteúdo */}
             <div
                 style={{
                     position: "relative",
@@ -542,7 +466,7 @@ function BriefScreen3({
                         margin: 0,
                         fontSize: 26,
                         fontWeight: 900,
-                        color: "#ffffff",
+                        color: "rgb(255, 255, 255)",
                         lineHeight: 1.2,
                     }}
                 >
@@ -573,7 +497,7 @@ function BriefScreen3({
                             <span style={{ fontSize: 20 }}>{diff.icon}</span>
                             <span style={{
                                 fontSize: 15,
-                                color: "#ffffff",
+                                color: "rgb(255, 255, 255)",
                                 fontWeight: 500,
                             }}>
                                 {diff.text}
@@ -594,7 +518,7 @@ function BriefScreen3({
                     <span style={{
                         fontSize: 16,
                         fontWeight: 700,
-                        color: "#ffffff",
+                        color: "rgb(255, 255, 255)",
                     }}>
                         Veja a viagem que preparei para você ↓
                     </span>
@@ -604,9 +528,6 @@ function BriefScreen3({
     )
 }
 
-/**
- * Renderiza uma tela do destino
- */
 function ScreenView({
     screen,
     index,
@@ -627,14 +548,14 @@ function ScreenView({
     return (
         <div
             style={{
-                height: "100vh",
+                height: "100dvh",
+                minHeight: "100vh",
                 scrollSnapAlign: "start",
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
             }}
         >
-            {/* Background Image */}
             {screen.imageUrl && (
                 <div
                     style={{
@@ -664,10 +585,8 @@ function ScreenView({
                 </div>
             )}
 
-            {/* Pagination */}
             <Pagination index={index} total={total} light={isHero} />
 
-            {/* Content */}
             <div
                 style={{
                     position: "relative",
@@ -682,34 +601,31 @@ function ScreenView({
                     overflowY: "auto",
                 }}
             >
-                {/* Badge */}
                 {screen.includedStatus && !isHero && !isSummary && (
                     <div style={{ marginBottom: 12 }}>
                         <IncludedBadge status={screen.includedStatus} />
                     </div>
                 )}
 
-                {/* Title */}
                 <h1
                     style={{
                         margin: 0,
                         fontSize: isHero ? 32 : 24,
                         fontWeight: 900,
-                        color: isHero ? "#fff" : "#111827",
+                        color: isHero ? "rgb(255, 255, 255)" : "rgb(17, 24, 39)",
                         lineHeight: 1.2,
                     }}
                 >
                     {screen.title}
                 </h1>
 
-                {/* Subtitle */}
                 {screen.subtitle && (
                     <p
                         style={{
                             margin: 0,
                             marginTop: 8,
                             fontSize: isHero ? 18 : 16,
-                            color: isHero ? "rgba(255,255,255,0.9)" : "#6b7280",
+                            color: isHero ? "rgba(255,255,255,0.9)" : "rgb(107, 114, 128)",
                             lineHeight: 1.4,
                         }}
                     >
@@ -717,14 +633,13 @@ function ScreenView({
                     </p>
                 )}
 
-                {/* Body */}
                 {screen.body && (
                     <p
                         style={{
                             margin: 0,
                             marginTop: 16,
                             fontSize: 15,
-                            color: isHero ? "rgba(255,255,255,0.85)" : "#374151",
+                            color: isHero ? "rgba(255,255,255,0.85)" : "rgb(55, 65, 81)",
                             lineHeight: 1.6,
                             whiteSpace: "pre-line",
                         }}
@@ -733,14 +648,12 @@ function ScreenView({
                     </p>
                 )}
 
-                {/* Hotel Carousel */}
                 {isHotel && screen.hotelCarouselImageUrls && (
                     <div style={{ marginTop: 20 }}>
                         <HotelCarousel imageUrls={screen.hotelCarouselImageUrls || []} />
                     </div>
                 )}
 
-                {/* Experiences Grid */}
                 {isExperiences && (screen as any).experienceItems && (
                     <div
                         style={{
@@ -756,47 +669,44 @@ function ScreenView({
                                 style={{
                                     padding: 14,
                                     borderRadius: 14,
-                                    background: "#f9fafb",
-                                    border: "1px solid #e5e7eb",
+                                    background: "rgb(249, 250, 251)",
+                                    border: "1px solid rgb(229, 231, 235)",
                                 }}
                             >
                                 <div style={{ fontSize: 24 }}>{exp.icon}</div>
                                 <div style={{ marginTop: 8, fontWeight: 700, fontSize: 14 }}>{exp.title}</div>
-                                <div style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>{exp.subtitle}</div>
+                                <div style={{ marginTop: 4, fontSize: 12, color: "rgb(107, 114, 128)" }}>{exp.subtitle}</div>
                             </div>
                         ))}
                     </div>
                 )}
 
-                {/* Flight Card */}
                 {isFlight && (screen as any).flightData && (
                     <FlightCard data={(screen as any).flightData} />
                 )}
 
-                {/* Summary Price */}
                 {isSummary && (screen as any).totalPrice && (
                     <div
                         style={{
                             marginTop: 24,
                             padding: 20,
                             borderRadius: 16,
-                            background: "#111827",
-                            color: "#fff",
+                            background: "rgb(17, 24, 39)",
+                            color: "rgb(255, 255, 255)",
                             textAlign: "center",
                         }}
                     >
-                        <div style={{ fontSize: 14, color: "#9ca3af" }}>Valor total</div>
+                        <div style={{ fontSize: 14, color: "rgb(156, 163, 175)" }}>Valor total</div>
                         <div style={{ marginTop: 8, fontSize: 32, fontWeight: 900 }}>
                             {(screen as any).totalPrice}
                         </div>
-                        <div style={{ marginTop: 8, fontSize: 13, color: "#9ca3af" }}>
+                        <div style={{ marginTop: 8, fontSize: 13, color: "rgb(156, 163, 175)" }}>
                             Parcelamos em até 10x sem juros
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Scroll hint */}
             {index < total - 1 && (
                 <ScrollHint light={isHero} />
             )}
@@ -804,9 +714,6 @@ function ScreenView({
     )
 }
 
-/**
- * Card de voo
- */
 function FlightCard({ data }: { data: any }) {
     return (
         <div
@@ -814,27 +721,27 @@ function FlightCard({ data }: { data: any }) {
                 marginTop: 20,
                 padding: 16,
                 borderRadius: 16,
-                background: "#fff",
-                border: "1px solid #e5e7eb",
+                background: "rgb(255, 255, 255)",
+                border: "1px solid rgb(229, 231, 235)",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
         >
-            <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 12 }}>
+            <div style={{ fontSize: 13, color: "rgb(107, 114, 128)", marginBottom: 12 }}>
                 {data.airline} · {data.flightNumber}
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: "#111827" }}>{data.departureTime}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{data.departureAirport}</div>
-                    <div style={{ fontSize: 12, color: "#6b7280" }}>{data.departureCity}</div>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: "rgb(17, 24, 39)" }}>{data.departureTime}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "rgb(17, 24, 39)" }}>{data.departureAirport}</div>
+                    <div style={{ fontSize: 12, color: "rgb(107, 114, 128)" }}>{data.departureCity}</div>
                 </div>
 
                 <div style={{ flex: 1, padding: "0 16px", textAlign: "center" }}>
-                    <div style={{ fontSize: 11, color: "#6b7280" }}>{data.duration}</div>
+                    <div style={{ fontSize: 11, color: "rgb(107, 114, 128)" }}>{data.duration}</div>
                     <div style={{
                         height: 2,
-                        background: "#e5e7eb",
+                        background: "rgb(229, 231, 235)",
                         margin: "8px 0",
                         position: "relative"
                     }}>
@@ -849,29 +756,26 @@ function FlightCard({ data }: { data: any }) {
                         </div>
                     </div>
                     {data.stops > 0 && (
-                        <div style={{ fontSize: 11, color: "#f59e0b" }}>
+                        <div style={{ fontSize: 11, color: "rgb(245, 158, 11)" }}>
                             {data.stops} parada{data.stops > 1 ? "s" : ""}
                         </div>
                     )}
                 </div>
 
                 <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: "#111827" }}>{data.arrivalTime}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{data.arrivalAirport}</div>
-                    <div style={{ fontSize: 12, color: "#6b7280" }}>{data.arrivalCity}</div>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: "rgb(17, 24, 39)" }}>{data.arrivalTime}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "rgb(17, 24, 39)" }}>{data.arrivalAirport}</div>
+                    <div style={{ fontSize: 12, color: "rgb(107, 114, 128)" }}>{data.arrivalCity}</div>
                 </div>
             </div>
 
-            <div style={{ marginTop: 12, fontSize: 13, color: "#6b7280", textAlign: "center" }}>
+            <div style={{ marginTop: 12, fontSize: 13, color: "rgb(107, 114, 128)", textAlign: "center" }}>
                 {data.date}
             </div>
         </div>
     )
 }
 
-/**
- * Item de credencial
- */
 function CredentialItem({
     icon,
     text,
@@ -897,16 +801,13 @@ function CredentialItem({
             >
                 {icon}
             </div>
-            <span style={{ fontSize: 16, color: "#ffffff", fontWeight: 500 }}>
+            <span style={{ fontSize: 16, color: "rgb(255, 255, 255)", fontWeight: 500 }}>
                 {text}
             </span>
         </div>
     )
 }
 
-/**
- * Paginação
- */
 function Pagination({
     index,
     total,
@@ -923,7 +824,7 @@ function Pagination({
                 top: 16,
                 right: 16,
                 background: light ? "rgba(0,0,0,0.5)" : "rgba(9,7,125,0.8)",
-                color: "#fff",
+                color: "rgb(255, 255, 255)",
                 padding: "4px 10px",
                 borderRadius: 12,
                 fontSize: 12,
@@ -936,9 +837,6 @@ function Pagination({
     )
 }
 
-/**
- * Indicador de scroll
- */
 function ScrollHint({ light = false }: { light?: boolean }) {
     return (
         <div
@@ -947,7 +845,7 @@ function ScrollHint({ light = false }: { light?: boolean }) {
                 bottom: 24,
                 left: "50%",
                 transform: "translateX(-50%)",
-                color: light ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.5)",
+                color: "rgba(255,255,255,0.5)",
                 fontSize: 12,
                 textAlign: "center",
                 zIndex: 10,
