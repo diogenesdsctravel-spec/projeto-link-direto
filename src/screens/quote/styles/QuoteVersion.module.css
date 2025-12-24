@@ -1,0 +1,669 @@
+/* ===========================================
+   QUOTE VERSION - ESTILOS
+   =========================================== */
+
+/* Container principal */
+.container {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* Loading */
+.loadingContainer {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui;
+    background: #09077d;
+}
+
+.loadingContent {
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #50cfad;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loadingText {
+    margin-top: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Error */
+.errorContainer {
+    padding: 24px;
+    font-family: system-ui;
+}
+
+/* ===========================================
+   BRIEF SCREEN 1
+   =========================================== */
+
+.briefScreen1 {
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+}
+
+.briefScreen1Photo {
+    flex: 1;
+    background-size: cover;
+    background-position: center top;
+}
+
+.briefScreen1Content {
+    flex-shrink: 0;
+    padding: 24px;
+    padding-bottom: 250px;
+    background: #ffffff;
+}
+
+.briefScreen1Title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.briefScreen1Subtitle {
+    margin: 0;
+    margin-top: 12px;
+    font-size: 17px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* ===========================================
+   BRIEF SCREEN 2
+   =========================================== */
+
+.briefScreen2 {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.briefScreen2Background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.briefScreen2Overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.briefScreen2Content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px;
+}
+
+.briefScreen2Title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+}
+
+.briefScreen2Subtitle {
+    margin: 0;
+    margin-top: 12px;
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+.briefScreen2Items {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.briefScreen2Item h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.briefScreen2Item p {
+    margin: 0;
+    margin-top: 4px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ===========================================
+   BRIEF SCREEN 3
+   =========================================== */
+
+.briefScreen3 {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.briefScreen3Background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.briefScreen3Overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.briefScreen3Content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    padding-bottom: 250px;
+    justify-content: flex-end;
+}
+
+.briefScreen3Title {
+    margin: 0;
+    margin-top: 24px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.briefScreen3Spacer {
+    flex: 1;
+}
+
+.briefScreen3Metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.briefScreen3Metric {
+    margin: 0;
+    font-size: 17px;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* ===========================================
+   HERO SCREEN
+   =========================================== */
+
+.heroScreen {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.heroBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.heroOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    padding-bottom: 32px;
+}
+
+.heroClientName {
+    margin: 0;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.heroTitle {
+    margin: 0;
+    margin-top: 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.heroSubtitle {
+    margin: 0;
+    margin-top: 12px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* ===========================================
+   SCREEN VIEW (telas dinâmicas)
+   =========================================== */
+
+.screenView {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.screenBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.screenOverlayDark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.screenOverlayLight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 1) 100%);
+}
+
+.screenContent {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    padding-bottom: 40px;
+    overflow-y: auto;
+}
+
+.screenContentHero {
+    justify-content: flex-end;
+    padding-top: 24px;
+}
+
+.screenContentDefault {
+    justify-content: flex-start;
+    padding-top: 60px;
+}
+
+.screenTitleLight {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.screenTitleDark {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.screenSubtitleLight {
+    margin: 0;
+    margin-top: 8px;
+    font-size: 16px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.screenSubtitleDark {
+    margin: 0;
+    margin-top: 8px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+}
+
+.screenBodyLight {
+    margin: 0;
+    margin-top: 16px;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.screenBodyDark {
+    margin: 0;
+    margin-top: 16px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+/* ===========================================
+   BOTÃO CTA
+   =========================================== */
+
+.ctaButton {
+    margin-top: 24px;
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: none;
+    background: #50cfad;
+    color: #09077d;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    z-index: 20;
+}
+
+/* ===========================================
+   EXPERIENCES GRID
+   =========================================== */
+
+.experiencesGrid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.experienceItem {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.experienceIcon {
+    font-size: 24px;
+}
+
+.experienceTitle {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.experienceSubtitle {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ===========================================
+   FLIGHT CARD
+   =========================================== */
+
+.flightCard {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.flightHeader {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+.flightRoute {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flightPoint {
+    text-align: left;
+}
+
+.flightPointRight {
+    text-align: right;
+}
+
+.flightTime {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+}
+
+.flightAirport {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.flightCity {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.flightMiddle {
+    flex: 1;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.flightDuration {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.flightLine {
+    height: 2px;
+    background: #e5e7eb;
+    margin: 8px 0;
+    position: relative;
+}
+
+.flightPlane {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+}
+
+.flightStops {
+    font-size: 11px;
+    color: #f59e0b;
+}
+
+.flightDate {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* ===========================================
+   SUMMARY
+   =========================================== */
+
+.summaryPrice {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 16px;
+    background: #111827;
+    color: #ffffff;
+    text-align: center;
+}
+
+.summaryLabel {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.summaryValue {
+    margin-top: 8px;
+    font-size: 32px;
+    font-weight: 900;
+}
+
+.summaryNote {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+/* ===========================================
+   PAGINATION
+   =========================================== */
+
+.pagination {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.paginationDark {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.paginationLight {
+    background: rgba(9, 7, 125, 0.8);
+}
+
+/* ===========================================
+   SCROLL HINT
+   =========================================== */
+
+.scrollHint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    text-align: center;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.scrollHintArrow {
+    font-size: 16px;
+}
+
+/* ===========================================
+   CREDENTIAL ITEM
+   =========================================== */
+
+.credentialItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.credentialIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.credentialText {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 500;
+}

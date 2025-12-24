@@ -1,6 +1,6 @@
 /**
  * DYNAMIC TEMPLATE GENERATOR
- * 
+ *
  * Gera telas narrativas usando:
  * - Dados REAIS extraídos do PDF (voos, preço, datas)
  * - Dados do BANCO (fotos do destino, hotel, experiências)
@@ -18,10 +18,18 @@ function formatDateNarrative(dateStr: string): string {
     if (!dateStr) return ""
 
     const months: Record<string, string> = {
-        "jan": "janeiro", "fev": "fevereiro", "mar": "março",
-        "abr": "abril", "mai": "maio", "jun": "junho",
-        "jul": "julho", "ago": "agosto", "set": "setembro",
-        "out": "outubro", "nov": "novembro", "dez": "dezembro"
+        "jan": "janeiro",
+        "fev": "fevereiro",
+        "mar": "março",
+        "abr": "abril",
+        "mai": "maio",
+        "jun": "junho",
+        "jul": "julho",
+        "ago": "agosto",
+        "set": "setembro",
+        "out": "outubro",
+        "nov": "novembro",
+        "dez": "dezembro"
     }
 
     const match = dateStr.match(/(\d{1,2})\s*\.?\s*(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i)
@@ -39,8 +47,13 @@ function formatDateNarrative(dateStr: string): string {
  */
 function getDayOfWeek(dateStr: string): string {
     const days: Record<string, string> = {
-        "seg": "segunda-feira", "ter": "terça-feira", "qua": "quarta-feira",
-        "qui": "quinta-feira", "sex": "sexta-feira", "sab": "sábado", "dom": "domingo"
+        "seg": "segunda-feira",
+        "ter": "terça-feira",
+        "qua": "quarta-feira",
+        "qui": "quinta-feira",
+        "sex": "sexta-feira",
+        "sab": "sábado",
+        "dom": "domingo"
     }
 
     const match = dateStr.match(/(seg|ter|qua|qui|sex|sab|dom)/i)
@@ -72,22 +85,20 @@ function generateHeroScreen(
     const nights = data.totalNights || data.hotel?.nights || 7
     const destination = data.destination || "seu destino"
 
+    void nights
+    void destination
+
     // Usar dados do banco se existirem
-    const heroImage = destinationData?.heroImageUrl ||
+    const heroImage =
+        destinationData?.heroImageUrl ||
         "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200"
-
-    const headline = destinationData?.heroHeadline ||
-        `${destination} te espera com experiências inesquecíveis.`
-
-    const subtext = destinationData?.heroSubtext ||
-        `${nights} dias onde tudo está resolvido.\nVocê só precisa estar presente.`
 
     return {
         screenId: "hero",
         type: "hero",
-        title: `${clientName.toUpperCase()},`,
-        subtitle: headline,
-        body: subtext,
+        title: `${clientName},`,
+        subtitle: "Alguns dias pensados para você desacelerar.",
+        body: "Tudo já está cuidado. Você só precisa estar presente.",
         imageUrl: heroImage,
         includedStatus: "included"
     }
@@ -234,13 +245,14 @@ function generateHotelScreen(
     const checkOutDate = formatDateNarrative(hotel.checkOut)
 
     // Usar fotos do banco se existirem
-    const hotelImages = hotelData?.imageUrls && hotelData.imageUrls.length > 0
-        ? hotelData.imageUrls
-        : [
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
-        ]
+    const hotelImages =
+        hotelData?.imageUrls && hotelData.imageUrls.length > 0
+            ? hotelData.imageUrls
+            : [
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+                "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+                "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+            ]
 
     // Usar descrição do banco se existir
     const shortDescription = hotelData?.shortDescription || `Seu refúgio em ${destination}`
@@ -267,16 +279,19 @@ function generateExperiencesScreen(
     const destination = data.destination || "seu destino"
 
     // Usar experiências do banco se existirem
-    const experiences = destinationData?.experiences && destinationData.experiences.length > 0
-        ? destinationData.experiences
-        : getDefaultExperiences(destination)
+    const experiences =
+        destinationData?.experiences && destinationData.experiences.length > 0
+            ? destinationData.experiences
+            : getDefaultExperiences(destination)
 
     return {
         screenId: "experiences",
         type: "experiences",
         title: "Experiências que te esperam",
         subtitle: `${destination} tem muito a oferecer`,
-        imageUrl: destinationData?.heroImageUrl || "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200",
+        imageUrl:
+            destinationData?.heroImageUrl ||
+            "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200",
         includedStatus: "included",
         experienceItems: experiences.map(exp => ({
             icon: exp.icon,
@@ -289,7 +304,7 @@ function generateExperiencesScreen(
 /**
  * Experiências padrão por destino (fallback)
  */
-function getDefaultExperiences(destination: string): Array<{ icon: string, title: string, subtitle: string }> {
+function getDefaultExperiences(destination: string): Array<{ icon: string; title: string; subtitle: string }> {
     const lowerDest = destination.toLowerCase()
 
     if (lowerDest.includes("cancun") || lowerDest.includes("cancún")) {
@@ -349,14 +364,13 @@ function generateSummaryScreen(
 
 /**
  * FUNÇÃO PRINCIPAL: Gera template completo
- * 
+ *
  * AGORA BUSCA DADOS DO SUPABASE!
  */
 export async function generateDynamicTemplateAsync(
     clientName: string,
     extractedData: ExtractedQuoteData
 ): Promise<DestinationTemplate> {
-
     const destination = extractedData.destination || "Destino"
     const destinationKey = generateDestinationKey(destination)
     const hotelName = extractedData.hotel?.name || ""
@@ -383,12 +397,13 @@ export async function generateDynamicTemplateAsync(
     ]
 
     // Experiências para a lista
-    const experiences: ExperienceTemplate[] = (destinationData?.experiences || getDefaultExperiences(destination))
-        .map(exp => ({
+    const experiences: ExperienceTemplate[] = (destinationData?.experiences || getDefaultExperiences(destination)).map(
+        exp => ({
             icon: exp.icon,
             title: exp.title,
             subtitle: exp.subtitle
-        }))
+        })
+    )
 
     return {
         destinationKey,
@@ -406,7 +421,6 @@ export function generateDynamicTemplate(
     clientName: string,
     extractedData: ExtractedQuoteData
 ): DestinationTemplate {
-
     const destination = extractedData.destination || "Destino"
     const destinationKey = generateDestinationKey(destination)
 
@@ -419,12 +433,11 @@ export function generateDynamicTemplate(
         generateSummaryScreen(extractedData, clientName)
     ]
 
-    const experiences: ExperienceTemplate[] = getDefaultExperiences(destination)
-        .map(exp => ({
-            icon: exp.icon,
-            title: exp.title,
-            subtitle: exp.subtitle
-        }))
+    const experiences: ExperienceTemplate[] = getDefaultExperiences(destination).map(exp => ({
+        icon: exp.icon,
+        title: exp.title,
+        subtitle: exp.subtitle
+    }))
 
     return {
         destinationKey,
@@ -438,5 +451,5 @@ export function generateDynamicTemplate(
  * Verifica se a cotação tem dados extraídos
  */
 export function hasExtractedData(quote: any): boolean {
-    return !!(quote?.extractedData?.destination)
+    return !!quote?.extractedData?.destination
 }
