@@ -17,6 +17,8 @@ export interface Destination {
     heroImageUrl: string | null
     heroHeadline: string | null
     heroSubtext: string | null
+    coverImageUrl: string | null      // NOVO: foto de capa (QuoteIndex)
+    coverSubtitle: string | null      // NOVO: subtítulo da capa
     experiences: Experience[]
     createdAt: string
 }
@@ -108,6 +110,8 @@ export async function saveDestination(destination: Partial<Destination> & { dest
             hero_image_url: destination.heroImageUrl || null,
             hero_headline: destination.heroHeadline || null,
             hero_subtext: destination.heroSubtext || null,
+            cover_image_url: destination.coverImageUrl || null,      // NOVO
+            cover_subtitle: destination.coverSubtitle || null,        // NOVO
             experiences: destination.experiences || [],
             updated_at: new Date().toISOString()
         }
@@ -337,8 +341,13 @@ export async function checkTemplateExists(
 
     if (!destination) {
         missingItems.push("destination")
-    } else if (!destination.heroImageUrl) {
-        missingItems.push("destination_hero")
+    } else {
+        if (!destination.heroImageUrl) {
+            missingItems.push("destination_hero")
+        }
+        if (!destination.coverImageUrl) {
+            missingItems.push("destination_cover")
+        }
     }
 
     if (!hotel) {
@@ -368,6 +377,8 @@ function mapDestination(data: any): Destination {
         heroImageUrl: data.hero_image_url,
         heroHeadline: data.hero_headline,
         heroSubtext: data.hero_subtext,
+        coverImageUrl: data.cover_image_url,      // NOVO
+        coverSubtitle: data.cover_subtitle,        // NOVO
         experiences: data.experiences || [],
         createdAt: data.created_at
     }
