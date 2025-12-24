@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { DestinationTemplate, ScreenTemplate } from "../../types/destinationTemplate"
 import { repositories } from "../../services/repositories"
 import { quoteRepository, type Quote } from "../../services/hybridQuoteRepository"
@@ -63,6 +63,13 @@ export default function QuoteVersion() {
         setLoading(false)
     }
 
+    const scrollToIndex = (targetIndex: number) => {
+        const container = containerRef.current
+        if (!container) return
+        const screenHeight = container.clientHeight
+        container.scrollTo({ top: screenHeight * targetIndex, behavior: "smooth" })
+    }
+
     useEffect(() => {
         const container = containerRef.current
         if (!container) return
@@ -74,7 +81,7 @@ export default function QuoteVersion() {
             setCurrentIndex(newIndex)
         }
 
-        container.addEventListener("scroll", handleScroll)
+        container.addEventListener("scroll", handleScroll, { passive: true })
         return () => container.removeEventListener("scroll", handleScroll)
     }, [])
 
@@ -135,16 +142,19 @@ export default function QuoteVersion() {
                 clientName={quote.clientName}
                 index={0}
                 total={totalScreens}
+                onNext={() => scrollToIndex(1)}
             />
             <BriefScreen2
                 agency={agency}
                 index={1}
                 total={totalScreens}
+                onNext={() => scrollToIndex(2)}
             />
             <BriefScreen3
                 agency={agency}
                 index={2}
                 total={totalScreens}
+                onNext={() => scrollToIndex(3)}
             />
 
             {destinationScreens.map((screen, index) => (
@@ -164,12 +174,14 @@ function BriefScreen1({
     agency,
     clientName,
     index,
-    total
+    total,
+    onNext
 }: {
     agency: AgencyProfile
     clientName: string
     index: number
     total: number
+    onNext: () => void
 }) {
     return (
         <div
@@ -184,8 +196,6 @@ function BriefScreen1({
                 background: "rgb(255, 255, 255)",
             }}
         >
-            <Pagination index={index} total={total} />
-
             <div
                 style={{
                     height: "clamp(360px, 68dvh, 540px)",
@@ -232,6 +242,7 @@ function BriefScreen1({
                 </p>
 
                 <button
+                    onClick={onNext}
                     style={{
                         marginTop: 18,
                         width: "100%",
@@ -255,11 +266,13 @@ function BriefScreen1({
 function BriefScreen2({
     agency,
     index,
-    total
+    total,
+    onNext
 }: {
     agency: AgencyProfile
     index: number
     total: number
+    onNext: () => void
 }) {
     const backgroundUrl = agency.storeFacadeUrl || agency.storeInteriorUrl
 
@@ -295,10 +308,7 @@ function BriefScreen2({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: `linear-gradient(to bottom,
-                                rgba(9, 7, 125, 0.3) 0%,
-                                rgba(9, 7, 125, 0.7) 50%,
-                                rgba(9, 7, 125, 0.98) 100%)`,
+                            background: "rgba(0, 0, 0, 0.35)",
                         }}
                     />
                 </div>
@@ -316,8 +326,6 @@ function BriefScreen2({
                 />
             )}
 
-            <Pagination index={index} total={total} />
-
             <div
                 style={{
                     position: "relative",
@@ -325,62 +333,88 @@ function BriefScreen2({
                     flex: 1,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end",
+                    justifyContent: "center",
                     padding: 24,
-                    paddingBottom: 80,
                 }}
             >
                 <h2
                     style={{
                         margin: 0,
-                        fontSize: 28,
-                        fontWeight: 900,
+                        fontSize: 24,
+                        fontWeight: 700,
                         color: "rgb(255, 255, 255)",
-                        lineHeight: 1.2,
+                        lineHeight: 1.3,
                     }}
                 >
-                    Uma agência de verdade.
+                    Nada aqui é improvisado.
                 </h2>
 
                 <p
                     style={{
                         margin: 0,
-                        marginTop: 8,
-                        fontSize: 18,
-                        color: "rgba(255,255,255,0.85)",
-                        lineHeight: 1.4,
+                        marginTop: 12,
+                        fontSize: 17,
+                        color: "rgba(255,255,255,0.9)",
+                        lineHeight: 1.5,
                     }}
                 >
-                    Com estrutura para cuidar da sua viagem.
+                    Sua viagem é construída com critério, clareza e acompanhamento real.
                 </p>
 
                 <div
                     style={{
-                        marginTop: 28,
+                        marginTop: 32,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 14,
+                        gap: 20,
                     }}
                 >
-                    <CredentialItem
-                        icon="🏢"
-                        text="Loja física em Vitória da Conquista"
-                        accent={agency.colorAccent}
-                    />
-                    <CredentialItem
-                        icon="📅"
-                        text={`${agency.yearsInBusiness} anos de mercado`}
-                        accent={agency.colorAccent}
-                    />
-                    <CredentialItem
-                        icon="💬"
-                        text="Atendimento presencial ou online"
-                        accent={agency.colorAccent}
-                    />
-                </div>
-            </div>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "rgb(255, 255, 255)" }}>
+                            Planejamento
+                        </h3>
+                        <p style={{ margin: 0, marginTop: 4, fontSize: 15, color: "rgba(255,255,255,0.85)" }}>
+                            Antes de qualquer sugestão.
+                        </p>
+                    </div>
 
-            <ScrollHint />
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "rgb(255, 255, 255)" }}>
+                            Curadoria
+                        </h3>
+                        <p style={{ margin: 0, marginTop: 4, fontSize: 15, color: "rgba(255,255,255,0.85)" }}>
+                            Menos opções. Melhores escolhas.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "rgb(255, 255, 255)" }}>
+                            Acompanhamento
+                        </h3>
+                        <p style={{ margin: 0, marginTop: 4, fontSize: 15, color: "rgba(255,255,255,0.85)" }}>
+                            Você não fica sozinho.
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    onClick={onNext}
+                    style={{
+                        marginTop: 40,
+                        width: "100%",
+                        padding: "18px 24px",
+                        borderRadius: 16,
+                        border: "none",
+                        background: "rgb(80, 207, 173)",
+                        color: "rgb(9, 7, 125)",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                    }}
+                >
+                    Ver como sua viagem foi desenhada
+                </button>
+            </div>
         </div>
     )
 }
@@ -388,11 +422,13 @@ function BriefScreen2({
 function BriefScreen3({
     agency,
     index,
-    total
+    total,
+    onNext
 }: {
     agency: AgencyProfile
     index: number
     total: number
+    onNext: () => void
 }) {
     return (
         <div
@@ -426,10 +462,7 @@ function BriefScreen3({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: `linear-gradient(to bottom,
-                                rgba(9, 7, 125, 0.3) 0%,
-                                rgba(9, 7, 125, 0.75) 50%,
-                                rgba(9, 7, 125, 0.98) 100%)`,
+                            background: "rgba(0, 0, 0, 0.5)",
                         }}
                     />
                 </div>
@@ -447,8 +480,6 @@ function BriefScreen3({
                 />
             )}
 
-            <Pagination index={index} total={total} />
-
             <div
                 style={{
                     position: "relative",
@@ -456,73 +487,59 @@ function BriefScreen3({
                     flex: 1,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end",
                     padding: 24,
-                    paddingBottom: 80,
                 }}
             >
                 <h2
                     style={{
                         margin: 0,
-                        fontSize: 26,
-                        fontWeight: 900,
+                        marginTop: 40,
+                        fontSize: 28,
+                        fontWeight: 700,
                         color: "rgb(255, 255, 255)",
                         lineHeight: 1.2,
                     }}
                 >
-                    {agency.tagline}
+                    Fazemos isso todos os dias.
                 </h2>
 
-                <div
-                    style={{
-                        marginTop: 24,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 10,
-                    }}
-                >
-                    {agency.differentials.map((diff, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 12,
-                                padding: "12px 16px",
-                                borderRadius: 12,
-                                background: "rgba(255,255,255,0.1)",
-                                backdropFilter: "blur(10px)",
-                            }}
-                        >
-                            <span style={{ fontSize: 20 }}>{diff.icon}</span>
-                            <span style={{
-                                fontSize: 15,
-                                color: "rgb(255, 255, 255)",
-                                fontWeight: 500,
-                            }}>
-                                {diff.text}
-                            </span>
-                        </div>
-                    ))}
-                </div>
+                <div style={{ flex: 0.66 }} />
 
                 <div
                     style={{
-                        marginTop: 28,
-                        padding: "16px 20px",
-                        borderRadius: 16,
-                        background: agency.colorAccent,
-                        textAlign: "center",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12,
+                        marginBottom: 24,
                     }}
                 >
-                    <span style={{
+                    <p style={{ margin: 0, fontSize: 17, color: "rgb(255, 255, 255)", fontWeight: 600 }}>
+                        +3.000 famílias atendidas
+                    </p>
+                    <p style={{ margin: 0, fontSize: 17, color: "rgb(255, 255, 255)", fontWeight: 600 }}>
+                        Nota 5.0 no Google
+                    </p>
+                    <p style={{ margin: 0, fontSize: 17, color: "rgb(255, 255, 255)", fontWeight: 600 }}>
+                        Suporte durante toda a viagem
+                    </p>
+                </div>
+
+                <button
+                    onClick={onNext}
+                    style={{
+                        width: "100%",
+                        padding: "18px 24px",
+                        borderRadius: 16,
+                        border: "none",
+                        background: "rgb(80, 207, 173)",
+                        color: "rgb(9, 7, 125)",
                         fontSize: 16,
                         fontWeight: 700,
-                        color: "rgb(255, 255, 255)",
-                    }}>
-                        Veja a viagem que preparei para você ↓
-                    </span>
-                </div>
+                        cursor: "pointer",
+                    }}
+                >
+                    Ver o roteiro criado para você
+                </button>
             </div>
         </div>
     )
@@ -584,8 +601,6 @@ function ScreenView({
                     />
                 </div>
             )}
-
-            <Pagination index={index} total={total} light={isHero} />
 
             <div
                 style={{
@@ -776,67 +791,6 @@ function FlightCard({ data }: { data: any }) {
     )
 }
 
-function CredentialItem({
-    icon,
-    text,
-    accent
-}: {
-    icon: string
-    text: string
-    accent: string
-}) {
-    return (
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-                style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: accent,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 18,
-                }}
-            >
-                {icon}
-            </div>
-            <span style={{ fontSize: 16, color: "rgb(255, 255, 255)", fontWeight: 500 }}>
-                {text}
-            </span>
-        </div>
-    )
-}
-
-function Pagination({
-    index,
-    total,
-    light = false
-}: {
-    index: number
-    total: number
-    light?: boolean
-}) {
-    return (
-        <div
-            style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                background: light ? "rgba(0,0,0,0.5)" : "rgba(9,7,125,0.8)",
-                color: "rgb(255, 255, 255)",
-                padding: "4px 10px",
-                borderRadius: 12,
-                fontSize: 12,
-                fontWeight: 600,
-                zIndex: 10,
-            }}
-        >
-            {index + 1}/{total}
-        </div>
-    )
-}
-
 function ScrollHint({ light = false }: { light?: boolean }) {
     return (
         <div
@@ -845,7 +799,7 @@ function ScrollHint({ light = false }: { light?: boolean }) {
                 bottom: 24,
                 left: "50%",
                 transform: "translateX(-50%)",
-                color: "rgba(255,255,255,0.5)",
+                color: light ? "rgba(255,255,255,0.6)" : "rgba(17,24,39,0.45)",
                 fontSize: 12,
                 textAlign: "center",
                 zIndex: 10,
