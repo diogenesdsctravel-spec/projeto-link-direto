@@ -4,6 +4,7 @@ import QuoteIndex from "../screens/quote/QuoteIndex"
 import QuoteVersion from "../screens/quote/QuoteVersion"
 import TemplateFormEditor from "../screens/app/TemplateFormEditor"
 import QuoteManager from "../screens/app/QuoteManager"
+import TemplateSetup from "../screens/vendor/TemplateSetup"
 import Diag from "../screens/Diag"
 
 function NotFoundVendor() {
@@ -49,6 +50,7 @@ export default function AppRoutes() {
             {/* Área do vendedor */}
             <Route path="/app" element={<VendorHome />} />
             <Route path="/app/cotacao/:id" element={<QuoteManager />} />
+            <Route path="/app/template-setup" element={<TemplateSetup />} />
             <Route path="/app/template/:destinationKey" element={<TemplateFormEditor />} />
             <Route path="/app/*" element={<NotFoundVendor />} />
 

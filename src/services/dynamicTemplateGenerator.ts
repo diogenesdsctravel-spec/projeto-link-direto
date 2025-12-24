@@ -1,11 +1,14 @@
 /**
  * DYNAMIC TEMPLATE GENERATOR
  * 
- * Gera telas narrativas usando dados REAIS extraídos do PDF
+ * Gera telas narrativas usando:
+ * - Dados REAIS extraídos do PDF (voos, preço, datas)
+ * - Dados do BANCO (fotos do destino, hotel, experiências)
  */
 
 import type { ExtractedQuoteData } from "../types/extractedQuoteData"
 import type { DestinationTemplate, ScreenTemplate, ExperienceTemplate } from "../types/destinationTemplate"
+import { getDestinationByKey, getHotelByName, type Destination, type Hotel } from "./destinationService"
 
 /**
  * Formata data para exibição narrativa
@@ -21,7 +24,6 @@ function formatDateNarrative(dateStr: string): string {
         "out": "outubro", "nov": "novembro", "dez": "dezembro"
     }
 
-    // Tentar extrair dia e mês
     const match = dateStr.match(/(\d{1,2})\s*\.?\s*(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i)
     if (match) {
         const day = match[1]
@@ -34,7 +36,6 @@ function formatDateNarrative(dateStr: string): string {
 
 /**
  * Formata dia da semana
- * "Sex. 30 Jan." → "sexta-feira"
  */
 function getDayOfWeek(dateStr: string): string {
     const days: Record<string, string> = {
@@ -50,18 +51,44 @@ function getDayOfWeek(dateStr: string): string {
 }
 
 /**
- * Gera tela HERO com nome do cliente e narrativa
+ * Gera destinationKey a partir do nome do destino
  */
-function generateHeroScreen(clientName: string, data: ExtractedQuoteData): ScreenTemplate {
+function generateDestinationKey(destination: string): string {
+    return destination
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+}
+
+/**
+ * Gera tela HERO com dados do banco ou fallback
+ */
+function generateHeroScreen(
+    clientName: string,
+    data: ExtractedQuoteData,
+    destinationData: Destination | null
+): ScreenTemplate {
     const nights = data.totalNights || data.hotel?.nights || 7
+    const destination = data.destination || "seu destino"
+
+    // Usar dados do banco se existirem
+    const heroImage = destinationData?.heroImageUrl ||
+        "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200"
+
+    const headline = destinationData?.heroHeadline ||
+        `${destination} te espera com experiências inesquecíveis.`
+
+    const subtext = destinationData?.heroSubtext ||
+        `${nights} dias onde tudo está resolvido.\nVocê só precisa estar presente.`
 
     return {
         screenId: "hero",
         type: "hero",
         title: `${clientName.toUpperCase()},`,
-        subtitle: `Buenos Aires te espera: tango, vinho malbec e histórias em cada esquina.`,
-        body: `${nights} dias onde tudo está resolvido.\nVocê só precisa estar presente.`,
-        imageUrl: "https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1200",
+        subtitle: headline,
+        body: subtext,
+        imageUrl: heroImage,
         includedStatus: "included"
     }
 }
@@ -106,7 +133,6 @@ function generateOutboundFlightScreen(data: ExtractedQuoteData): ScreenTemplate 
         body,
         imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200",
         includedStatus: "included",
-        // Dados estruturados para o card de voo
         flightData: {
             airline: firstSegment.airline,
             flightNumber: firstSegment.flightNumber,
@@ -144,6 +170,7 @@ function generateReturnFlightScreen(data: ExtractedQuoteData): ScreenTemplate {
 
     const dateNarrative = formatDateNarrative(firstSegment.date)
     const hasConnection = (flight.stops || 0) > 0
+    const destination = data.destination || "seu destino"
 
     let body = `No dia ${dateNarrative}, sua aventura se encerra. Você decola às ${firstSegment.departureTime} de ${firstSegment.departureCity}.`
 
@@ -154,7 +181,7 @@ function generateReturnFlightScreen(data: ExtractedQuoteData): ScreenTemplate {
         body += `\n\nApós ${firstSegment.duration}, você chega em casa às ${firstSegment.arrivalTime}.`
     }
 
-    body += `\n\nMas as memórias de Buenos Aires vão com você.`
+    body += `\n\nMas as memórias de ${destination} vão com você.`
 
     return {
         screenId: "flight-return",
@@ -182,10 +209,14 @@ function generateReturnFlightScreen(data: ExtractedQuoteData): ScreenTemplate {
 }
 
 /**
- * Gera tela de HOTEL com dados reais
+ * Gera tela de HOTEL com dados do banco ou fallback
  */
-function generateHotelScreen(data: ExtractedQuoteData): ScreenTemplate {
+function generateHotelScreen(
+    data: ExtractedQuoteData,
+    hotelData: Hotel | null
+): ScreenTemplate {
     const hotel = data.hotel
+    const destination = data.destination || "seu destino"
 
     if (!hotel) {
         return {
@@ -198,105 +229,206 @@ function generateHotelScreen(data: ExtractedQuoteData): ScreenTemplate {
         }
     }
 
-    const stars = "★".repeat(hotel.stars || 3)
+    const stars = "★".repeat(hotel.stars || 4)
     const checkInDate = formatDateNarrative(hotel.checkIn)
     const checkOutDate = formatDateNarrative(hotel.checkOut)
+
+    // Usar fotos do banco se existirem
+    const hotelImages = hotelData?.imageUrls && hotelData.imageUrls.length > 0
+        ? hotelData.imageUrls
+        : [
+            "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
+        ]
+
+    // Usar descrição do banco se existir
+    const shortDescription = hotelData?.shortDescription || `Seu refúgio em ${destination}`
 
     return {
         screenId: "hotel",
         type: "hotel",
         title: `${hotel.name} ${stars}`,
-        subtitle: `Seu refúgio em Buenos Aires`,
+        subtitle: shortDescription,
         body: `${hotel.nights} noites no coração da cidade.\n\nCheck-in: ${checkInDate} às ${hotel.checkInTime}\nCheck-out: ${checkOutDate} às ${hotel.checkOutTime}\n\nQuarto: ${hotel.roomType}\nEndereço: ${hotel.address}`,
-        imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200",
-        hotelCarouselImageUrls: [
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
-        ],
+        imageUrl: hotelImages[0],
+        hotelCarouselImageUrls: hotelImages,
         includedStatus: "included"
     }
 }
 
 /**
- * Gera tela de EXPERIÊNCIAS
+ * Gera tela de EXPERIÊNCIAS com dados do banco ou fallback
  */
-function generateExperiencesScreen(): ScreenTemplate {
+function generateExperiencesScreen(
+    data: ExtractedQuoteData,
+    destinationData: Destination | null
+): ScreenTemplate {
+    const destination = data.destination || "seu destino"
+
+    // Usar experiências do banco se existirem
+    const experiences = destinationData?.experiences && destinationData.experiences.length > 0
+        ? destinationData.experiences
+        : getDefaultExperiences(destination)
+
     return {
         screenId: "experiences",
         type: "experiences",
         title: "Experiências que te esperam",
-        subtitle: "Buenos Aires tem muito a oferecer",
-        imageUrl: "https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1200",
+        subtitle: `${destination} tem muito a oferecer`,
+        imageUrl: destinationData?.heroImageUrl || "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200",
         includedStatus: "included",
-        experienceItems: [
-            { icon: "🥩", title: "Jantar em parrilla tradicional", subtitle: "Carne argentina no ponto perfeito" },
-            { icon: "💃", title: "Show de tango em San Telmo", subtitle: "A alma de Buenos Aires" },
+        experienceItems: experiences.map(exp => ({
+            icon: exp.icon,
+            title: exp.title,
+            subtitle: exp.subtitle
+        }))
+    }
+}
+
+/**
+ * Experiências padrão por destino (fallback)
+ */
+function getDefaultExperiences(destination: string): Array<{ icon: string, title: string, subtitle: string }> {
+    const lowerDest = destination.toLowerCase()
+
+    if (lowerDest.includes("cancun") || lowerDest.includes("cancún")) {
+        return [
+            { icon: "🏛️", title: "Chichén Itzá", subtitle: "A 7ª maravilha do mundo" },
+            { icon: "🐬", title: "Nado com golfinhos", subtitle: "Experiência inesquecível" },
+            { icon: "🚤", title: "Isla Mujeres", subtitle: "Praias paradisíacas" },
+            { icon: "🤿", title: "Snorkel em recifes", subtitle: "Vida marinha incrível" },
+            { icon: "🌮", title: "Gastronomia mexicana", subtitle: "Sabores autênticos" },
+            { icon: "🎉", title: "Vida noturna", subtitle: "Baladas à beira-mar" }
+        ]
+    }
+
+    if (lowerDest.includes("buenos")) {
+        return [
+            { icon: "🥩", title: "Jantar em parrilla", subtitle: "Carne argentina no ponto perfeito" },
+            { icon: "💃", title: "Show de tango", subtitle: "A alma de Buenos Aires" },
             { icon: "🍷", title: "Degustação de Malbec", subtitle: "Os melhores vinhos argentinos" },
             { icon: "🏛️", title: "Tour por Recoleta", subtitle: "Arte, história e arquitetura" },
             { icon: "⚽", title: "La Bombonera", subtitle: "O templo do futebol argentino" },
             { icon: "🛍️", title: "Compras em Palermo", subtitle: "Moda e design local" }
         ]
     }
+
+    // Fallback genérico
+    return [
+        { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos" },
+        { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos" },
+        { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local" },
+        { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis" },
+        { icon: "🛍️", title: "Compras", subtitle: "Produtos locais" },
+        { icon: "🎭", title: "Entretenimento", subtitle: "Shows e eventos" }
+    ]
 }
 
 /**
  * Gera tela de SUMMARY com preço
  */
-function generateSummaryScreen(data: ExtractedQuoteData, clientName: string): ScreenTemplate {
+function generateSummaryScreen(
+    data: ExtractedQuoteData,
+    clientName: string
+): ScreenTemplate {
+    const destination = data.destination || "seu destino"
+    const nights = data.totalNights || data.hotel?.nights || 7
+
     return {
         screenId: "summary",
         type: "summary",
         title: "Resumo do seu pacote",
         subtitle: `${clientName}, sua aventura está pronta`,
-        body: `${data.passengers || "2 adultos"}\n${data.totalNights || 7} noites em Buenos Aires\nVoos + Hotel + Experiências`,
+        body: `${data.passengers || "2 adultos"}\n${nights} noites em ${destination}\nVoos + Hotel + Experiências`,
         totalPrice: data.totalPrice || "A consultar",
-        imageUrl: "https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1200",
+        imageUrl: "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200",
         includedStatus: "included"
     }
 }
 
 /**
- * FUNÇÃO PRINCIPAL: Gera template completo com dados do PDF
+ * FUNÇÃO PRINCIPAL: Gera template completo
+ * 
+ * AGORA BUSCA DADOS DO SUPABASE!
+ */
+export async function generateDynamicTemplateAsync(
+    clientName: string,
+    extractedData: ExtractedQuoteData
+): Promise<DestinationTemplate> {
+
+    const destination = extractedData.destination || "Destino"
+    const destinationKey = generateDestinationKey(destination)
+    const hotelName = extractedData.hotel?.name || ""
+
+    console.log(`🔍 Buscando template para: ${destination} (${destinationKey})`)
+    console.log(`🏨 Buscando hotel: ${hotelName}`)
+
+    // Buscar dados do banco
+    const [destinationData, hotelData] = await Promise.all([
+        getDestinationByKey(destinationKey),
+        hotelName ? getHotelByName(hotelName) : Promise.resolve(null)
+    ])
+
+    console.log(`📍 Destino encontrado:`, destinationData ? "SIM" : "NÃO")
+    console.log(`🏨 Hotel encontrado:`, hotelData ? "SIM" : "NÃO")
+
+    const screens: ScreenTemplate[] = [
+        generateHeroScreen(clientName, extractedData, destinationData),
+        generateHotelScreen(extractedData, hotelData),
+        generateExperiencesScreen(extractedData, destinationData),
+        generateOutboundFlightScreen(extractedData),
+        generateReturnFlightScreen(extractedData),
+        generateSummaryScreen(extractedData, clientName)
+    ]
+
+    // Experiências para a lista
+    const experiences: ExperienceTemplate[] = (destinationData?.experiences || getDefaultExperiences(destination))
+        .map(exp => ({
+            icon: exp.icon,
+            title: exp.title,
+            subtitle: exp.subtitle
+        }))
+
+    return {
+        destinationKey,
+        destinationName: destination,
+        screens,
+        experiences
+    }
+}
+
+/**
+ * FUNÇÃO SÍNCRONA (para compatibilidade)
+ * Usa dados de fallback se não conseguir buscar do banco
  */
 export function generateDynamicTemplate(
     clientName: string,
     extractedData: ExtractedQuoteData
 ): DestinationTemplate {
 
+    const destination = extractedData.destination || "Destino"
+    const destinationKey = generateDestinationKey(destination)
+
     const screens: ScreenTemplate[] = [
-        // 1. Hero com nome do cliente
-        generateHeroScreen(clientName, extractedData),
-
-        // 2. Hotel
-        generateHotelScreen(extractedData),
-
-        // 3. Experiências
-        generateExperiencesScreen(),
-
-        // 4. Voo de ida
+        generateHeroScreen(clientName, extractedData, null),
+        generateHotelScreen(extractedData, null),
+        generateExperiencesScreen(extractedData, null),
         generateOutboundFlightScreen(extractedData),
-
-        // 5. Voo de volta
         generateReturnFlightScreen(extractedData),
-
-        // 6. Summary com preço
         generateSummaryScreen(extractedData, clientName)
     ]
 
-    // Experiências para a tela de experiências
-    const experiences: ExperienceTemplate[] = [
-        { icon: "🥩", title: "Jantar em parrilla", subtitle: "Carne argentina" },
-        { icon: "💃", title: "Show de tango", subtitle: "San Telmo" },
-        { icon: "🍷", title: "Degustação de Malbec", subtitle: "Vinhos premium" },
-        { icon: "🏛️", title: "Tour Recoleta", subtitle: "Arte e história" },
-        { icon: "⚽", title: "La Bombonera", subtitle: "Futebol argentino" },
-        { icon: "🛍️", title: "Compras Palermo", subtitle: "Design local" }
-    ]
+    const experiences: ExperienceTemplate[] = getDefaultExperiences(destination)
+        .map(exp => ({
+            icon: exp.icon,
+            title: exp.title,
+            subtitle: exp.subtitle
+        }))
 
     return {
-        destinationKey: "buenos-aires",
-        destinationName: "Buenos Aires",
+        destinationKey,
+        destinationName: destination,
         screens,
         experiences
     }

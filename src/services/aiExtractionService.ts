@@ -1,9 +1,11 @@
 /**
- * AI EXTRACTION SERVICE - VERSÃO FINAL
+ * AI EXTRACTION SERVICE - VERSÃO CORRIGIDA
  * 
  * Estratégia:
  * - Imagens: envia direto para OpenAI Vision
  * - PDFs: converte para imagens usando pdf.js e canvas, depois envia
+ * 
+ * CORREÇÃO: Prompt melhorado para identificar destino TURÍSTICO corretamente
  */
 
 import type { ExtractedQuoteData, ExtractionResult } from "../types/extractedQuoteData"
@@ -14,8 +16,42 @@ const EXTRACTION_PROMPT = `Você é um assistente especializado em extrair dados
 
 Analise esta(s) imagem(ns) de cotação e extraia TODOS os dados em formato JSON.
 
+═══════════════════════════════════════════════════════════════
+REGRAS CRÍTICAS PARA IDENTIFICAR ORIGEM E DESTINO:
+═══════════════════════════════════════════════════════════════
+
+1. ORIGEM DO CLIENTE = primeiro aeroporto do VOO DE IDA (de onde o avião DECOLA)
+2. DESTINO DA VIAGEM = último aeroporto do VOO DE IDA (onde o avião POUSA)
+
+3. Para identificar o DESTINO TURÍSTICO (campo "destination"):
+   - PRIORIZE o nome do HOTEL - ele indica a cidade turística real
+   - Exemplo: "Bella Gramado Resort" → destino é "Gramado"
+   - Exemplo: "Hotel Krystal Cancún" → destino é "Cancún"
+   - O aeroporto de destino pode ser em cidade próxima (POA→Gramado, CUN→Riviera Maya)
+
+4. IGNORE para definir destino:
+   - Nome da agência de viagens (geralmente no rodapé/header)
+   - Cidade de origem do cliente
+   - Referências à cidade onde a agência fica localizada
+
+5. Se o título do PDF menciona duas cidades como "Viagem para X + Y":
+   - A primeira geralmente é o aeroporto de destino
+   - A segunda pode ser a origem OU uma referência à agência
+   - SEMPRE valide pelo HOTEL e pelos VOOS
+
+EXEMPLO DE ANÁLISE:
+- Título: "Viagem para Porto Alegre + Vitória da Conquista"
+- Voo IDA: VDC 10:45 → POA 16:55
+- Hotel: "Bella Gramado Resort"
+- CONCLUSÃO: 
+  - origin = "Vitória da Conquista" (VDC é o primeiro aeroporto)
+  - destination = "Gramado" (nome do hotel indica destino turístico)
+
+═══════════════════════════════════════════════════════════════
+
 EXTRAIA:
-- Origem e destino da viagem
+- Destino TURÍSTICO (baseado no hotel, não no título)
+- Origem do cliente (primeiro aeroporto do voo de ida)
 - Datas de ida e volta
 - TODOS os voos com: companhia, número, horários, aeroportos, duração
 - Conexões/escalas se houver
@@ -26,8 +62,10 @@ EXTRAIA:
 Retorne APENAS JSON válido, sem markdown ou explicações.
 
 {
-  "destination": "cidade",
-  "origin": "cidade",
+  "destination": "cidade turística (baseado no HOTEL)",
+  "destinationAirport": "código do aeroporto de destino",
+  "origin": "cidade de origem do cliente",
+  "originAirport": "código do aeroporto de origem",
   "travelDate": "data ida",
   "returnDate": "data volta", 
   "totalNights": numero,
@@ -48,27 +86,68 @@ Retorne APENAS JSON válido, sem markdown ou explicações.
       }
     ],
     "totalDuration": "Xh XXm",
-    "stops": 0
+    "stops": 0,
+    "stopInfo": "conexão em CIDADE se houver"
   },
   "returnFlight": {
     "segments": [...],
     "totalDuration": "Xh XXm",
-    "stops": 0
+    "stops": 0,
+    "stopInfo": "conexão em CIDADE se houver"
   },
   "hotel": {
-    "name": "nome",
-    "stars": 3,
+    "name": "nome completo",
+    "stars": 4,
     "address": "endereço",
     "checkIn": "data",
-    "checkInTime": "HH:MM",
+    "checkInTime": "14:00",
     "checkOut": "data",
-    "checkOutTime": "HH:MM",
+    "checkOutTime": "12:00",
     "nights": 7,
-    "roomType": "tipo"
+    "roomType": "tipo",
+    "mealPlan": "café da manhã/all inclusive/etc"
+  },
+  "transfers": {
+    "included": true,
+    "type": "compartilhado/privativo",
+    "details": "descrição"
   },
   "totalPrice": "R$ X.XXX",
-  "quotationDate": "data"
-}`
+  "quotationDate": "data da cotação",
+  "suggestedExperiences": [
+    {
+      "icon": "emoji apropriado",
+      "title": "Nome da experiência específica do destino",
+      "subtitle": "Breve descrição atrativa",
+      "searchTerm": "termo para buscar foto no Google/Unsplash"
+    }
+  ]
+}
+
+IMPORTANTE SOBRE suggestedExperiences:
+
+Gere 6 experiências que são os CLICHÊS VISUAIS ICÔNICOS do destino.
+
+MÉTODO PARA IDENTIFICAR OS CLICHÊS (use esse raciocínio para QUALQUER destino):
+1. "Se eu pesquisar '[DESTINO] o que fazer' no Google, o que aparece primeiro?"
+2. "Se eu buscar #[DESTINO] no Instagram, quais fotos todo mundo posta?"
+3. "O que 10 em 10 blogs de viagem listam como imperdível?"
+4. "Qual imagem vem à mente de qualquer pessoa quando fala esse destino?"
+5. "O que é o CARTÃO-POSTAL oficial do lugar?"
+6. "Qual experiência é SINÔNIMO do destino?"
+
+REGRAS:
+- Use nomes de ATRAÇÕES REAIS E FAMOSAS (Lago Negro, Chichén Itzá, Cristo Redentor)
+- Priorize lugares que APARECEM EM FOTOS (paisagens, monumentos, experiências fotogênicas)
+- Inclua a EXPERIÊNCIA GASTRONÔMICA mais icônica do destino
+- O "searchTerm" deve ser o que um turista digitaria para achar fotos do lugar
+- Pense como um INFLUENCIADOR DE VIAGEM: o que ele postaria?
+
+NÃO FAÇA:
+- Categorias genéricas ("Pontos turísticos", "Gastronomia local", "Cultura e história")
+- Experiências que não rendem foto
+- Lugares obscuros que só moradores conhecem
+- Nomes de lojas ou estabelecimentos comerciais específicos`
 
 /**
  * Converte arquivo para base64

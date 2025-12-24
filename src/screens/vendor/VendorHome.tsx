@@ -3,10 +3,15 @@ import { useNavigate } from "react-router-dom"
 import { extractQuoteFromFile, isAIConfigured, loadPDFJS } from "../../services/aiExtractionService"
 import { quoteRepository } from "../../services/hybridQuoteRepository"
 import { isSupabaseConfigured } from "../../services/supabaseClient"
+import { checkTemplateExists } from "../../services/destinationService"
 import type { ExtractedQuoteData } from "../../types/extractedQuoteData"
 
 /**
  * VENDOR HOME - COM SUPABASE
+ * 
+ * MUDANÇA: 
+ * - Destino extraído automaticamente pela IA (sem dropdown)
+ * - Se template não existe, redireciona para cadastro
  */
 
 export default function VendorHome() {
@@ -15,7 +20,7 @@ export default function VendorHome() {
     const [file, setFile] = useState<File | null>(null)
     const [clientName, setClientName] = useState("")
     const [destinationKey, setDestinationKey] = useState("")
-    const [status, setStatus] = useState<"idle" | "loading" | "extracting" | "extracted" | "saving" | "error">("idle")
+    const [status, setStatus] = useState<"idle" | "loading" | "extracting" | "extracted" | "checking" | "saving" | "error">("idle")
     const [error, setError] = useState("")
     const [extractedData, setExtractedData] = useState<ExtractedQuoteData | null>(null)
     const [pdfReady, setPdfReady] = useState(false)
@@ -32,13 +37,9 @@ export default function VendorHome() {
         setStatus("idle")
         setError("")
         setExtractedData(null)
+        setDestinationKey("") // Limpar destino anterior
 
         if (!selectedFile) return
-
-        const fileName = selectedFile.name.toLowerCase()
-        if (fileName.includes("buenos")) setDestinationKey("buenos-aires")
-        else if (fileName.includes("santiago")) setDestinationKey("santiago")
-        else if (fileName.includes("bariloche")) setDestinationKey("bariloche")
 
         if (selectedFile.type === "application/pdf" && !pdfReady) {
             setStatus("loading")
@@ -64,11 +65,14 @@ export default function VendorHome() {
                     setExtractedData(result.data)
                     setStatus("extracted")
 
+                    // NOVO: Gerar destinationKey automaticamente do destino extraído
                     if (result.data.destination) {
-                        const dest = result.data.destination.toLowerCase()
-                        if (dest.includes("buenos")) setDestinationKey("buenos-aires")
-                        else if (dest.includes("santiago")) setDestinationKey("santiago")
-                        else if (dest.includes("bariloche")) setDestinationKey("bariloche")
+                        const key = result.data.destination
+                            .toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "")
+                            .replace(/\s+/g, "-")
+                        setDestinationKey(key)
                     }
                 } else {
                     setStatus("error")
@@ -88,18 +92,38 @@ export default function VendorHome() {
         }
 
         if (!destinationKey) {
-            setError("Selecione o destino")
+            setError("Destino não foi extraído. Tente novamente.")
             return
         }
 
-        setStatus("saving")
+        setStatus("checking")
         setError("")
 
         try {
-            console.log("💾 Criando cotação...")
-            console.log("Supabase configurado?", isSupabaseConfigured())
+            // Verificar se template existe
+            const hotelName = extractedData?.hotel?.name || ""
+            const templateCheck = await checkTemplateExists(destinationKey, hotelName)
 
-            // Usar repositório híbrido (Supabase ou localStorage)
+            console.log("📋 Verificação de template:", templateCheck)
+
+            // Se falta algo, redirecionar para cadastro
+            if (!templateCheck.destinationExists || !templateCheck.hotelExists) {
+                console.log("🆕 Template incompleto, redirecionando para cadastro...")
+                navigate("/app/template-setup", {
+                    state: {
+                        extractedData,
+                        clientName: clientName.trim(),
+                        destinationKey,
+                        templateCheck
+                    }
+                })
+                return
+            }
+
+            // Template existe, criar cotação diretamente
+            setStatus("saving")
+            console.log("💾 Criando cotação...")
+
             const quote = await quoteRepository.create({
                 clientName: clientName.trim(),
                 destinationKey,
@@ -107,14 +131,12 @@ export default function VendorHome() {
             })
 
             console.log("✅ Cotação criada:", quote)
-
-            // Navegar para gerenciar
             navigate(`/app/cotacao/${quote.id}`)
 
         } catch (err) {
-            console.error("❌ Erro ao criar cotação:", err)
+            console.error("❌ Erro:", err)
             setStatus("error")
-            setError("Erro ao salvar cotação. Tente novamente.")
+            setError("Erro ao processar. Tente novamente.")
         }
     }
 
@@ -220,31 +242,26 @@ export default function VendorHome() {
                         />
                     </div>
 
-                    {/* Destino */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        <div style={{ fontSize: 13, color: "#111827", fontWeight: 800 }}>Destino</div>
-                        <select
-                            value={destinationKey}
-                            onChange={(e) => {
-                                setDestinationKey(e.target.value)
-                                setError("")
-                            }}
-                            style={{
-                                width: "100%",
-                                padding: "12px 12px",
-                                borderRadius: 14,
-                                border: "1px solid #e5e7eb",
-                                fontSize: 14,
-                                background: "#fff",
-                            }}
-                        >
-                            <option value="">Selecione…</option>
-                            <option value="buenos-aires">Buenos Aires</option>
-                            <option value="santiago">Santiago</option>
-                            <option value="bariloche">Bariloche</option>
-                            <option value="rio-de-janeiro">Rio de Janeiro</option>
-                        </select>
-                    </div>
+                    {/* NOVO: Destino extraído automaticamente (somente leitura) */}
+                    {extractedData?.destination && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            <div style={{ fontSize: 13, color: "#111827", fontWeight: 800 }}>Destino</div>
+                            <div
+                                style={{
+                                    width: "100%",
+                                    padding: "12px 12px",
+                                    borderRadius: 14,
+                                    border: "1px solid #d1d5db",
+                                    fontSize: 14,
+                                    background: "#f3f4f6",
+                                    color: "#111827",
+                                    fontWeight: 600,
+                                }}
+                            >
+                                📍 {extractedData.destination}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Preview dos dados extraídos */}
                     {extractedData && (
@@ -280,18 +297,18 @@ export default function VendorHome() {
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <button
                             onClick={createQuote}
-                            disabled={status === "extracting" || status === "saving"}
+                            disabled={status === "extracting" || status === "saving" || status === "checking"}
                             style={{
                                 padding: "12px 14px",
                                 borderRadius: 14,
                                 border: "1px solid #111827",
-                                background: (status === "extracting" || status === "saving") ? "#9ca3af" : "#111827",
+                                background: (status === "extracting" || status === "saving" || status === "checking") ? "#9ca3af" : "#111827",
                                 color: "#ffffff",
                                 fontWeight: 900,
-                                cursor: (status === "extracting" || status === "saving") ? "not-allowed" : "pointer",
+                                cursor: (status === "extracting" || status === "saving" || status === "checking") ? "not-allowed" : "pointer",
                             }}
                         >
-                            {status === "saving" ? "Salvando..." : "Criar Cotação"}
+                            {status === "saving" ? "Salvando..." : status === "checking" ? "Verificando..." : "Criar Cotação"}
                         </button>
 
                         {error && <div style={{ fontSize: 13, color: "#b91c1c" }}>{error}</div>}
