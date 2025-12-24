@@ -602,125 +602,201 @@ function ScreenView({
                 </div>
             )}
 
-            <div
-                style={{
-                    position: "relative",
-                    zIndex: 1,
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: isHero ? "flex-end" : "flex-start",
-                    padding: 24,
-                    paddingTop: isHero ? 24 : 60,
-                    paddingBottom: 40,
-                    overflowY: "auto",
-                }}
-            >
-                {screen.includedStatus && !isHero && !isSummary && (
-                    <div style={{ marginBottom: 12 }}>
-                        <IncludedBadge status={screen.includedStatus} />
-                    </div>
-                )}
-
-                <h1
+            {isHero ? (
+                <div
                     style={{
-                        margin: 0,
-                        fontSize: isHero ? 32 : 24,
-                        fontWeight: 900,
-                        color: isHero ? "rgb(255, 255, 255)" : "rgb(17, 24, 39)",
-                        lineHeight: 1.2,
+                        position: "relative",
+                        zIndex: 1,
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "flex-end",
+                        padding: 24,
+                        paddingBottom: 250,
                     }}
                 >
-                    {screen.title}
-                </h1>
-
-                {screen.subtitle && (
                     <p
+                        style={{
+                            margin: 0,
+                            fontSize: 16,
+                            color: "rgba(255,255,255,0.8)",
+                            fontWeight: 500,
+                        }}
+                    >
+                        {screen.title}
+                    </p>
+
+                    <h1
                         style={{
                             margin: 0,
                             marginTop: 8,
-                            fontSize: isHero ? 18 : 16,
-                            color: isHero ? "rgba(255,255,255,0.9)" : "rgb(107, 114, 128)",
-                            lineHeight: 1.4,
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: "rgb(255, 255, 255)",
+                            lineHeight: 1.2,
                         }}
                     >
                         {screen.subtitle}
-                    </p>
-                )}
+                    </h1>
 
-                {screen.body && (
                     <p
                         style={{
                             margin: 0,
-                            marginTop: 16,
-                            fontSize: 15,
-                            color: isHero ? "rgba(255,255,255,0.85)" : "rgb(55, 65, 81)",
-                            lineHeight: 1.6,
+                            marginTop: 12,
+                            fontSize: 16,
+                            color: "rgba(255,255,255,0.8)",
+                            lineHeight: 1.5,
                             whiteSpace: "pre-line",
                         }}
                     >
                         {screen.body}
                     </p>
-                )}
 
-                {isHotel && screen.hotelCarouselImageUrls && (
-                    <div style={{ marginTop: 20 }}>
-                        <HotelCarousel imageUrls={screen.hotelCarouselImageUrls || []} />
-                    </div>
-                )}
-
-                {isExperiences && (screen as any).experienceItems && (
-                    <div
-                        style={{
-                            marginTop: 20,
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: 12,
+                    <button
+                        onClick={() => {
+                            const container = document.querySelector('[style*="scroll-snap-type"]') as HTMLElement
+                            if (container) {
+                                const currentScroll = container.scrollTop
+                                container.scrollTo({ top: currentScroll + window.innerHeight, behavior: "smooth" })
+                            }
                         }}
-                    >
-                        {(screen as any).experienceItems.map((exp: any, i: number) => (
-                            <div
-                                key={i}
-                                style={{
-                                    padding: 14,
-                                    borderRadius: 14,
-                                    background: "rgb(249, 250, 251)",
-                                    border: "1px solid rgb(229, 231, 235)",
-                                }}
-                            >
-                                <div style={{ fontSize: 24 }}>{exp.icon}</div>
-                                <div style={{ marginTop: 8, fontWeight: 700, fontSize: 14 }}>{exp.title}</div>
-                                <div style={{ marginTop: 4, fontSize: 12, color: "rgb(107, 114, 128)" }}>{exp.subtitle}</div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {isFlight && (screen as any).flightData && (
-                    <FlightCard data={(screen as any).flightData} />
-                )}
-
-                {isSummary && (screen as any).totalPrice && (
-                    <div
                         style={{
                             marginTop: 24,
-                            padding: 20,
+                            width: "100%",
+                            padding: "18px 24px",
                             borderRadius: 16,
-                            background: "rgb(17, 24, 39)",
-                            color: "rgb(255, 255, 255)",
-                            textAlign: "center",
+                            border: "none",
+                            background: "rgb(80, 207, 173)",
+                            color: "rgb(9, 7, 125)",
+                            fontSize: 16,
+                            fontWeight: 600,
+                            cursor: "pointer",
                         }}
                     >
-                        <div style={{ fontSize: 14, color: "rgb(156, 163, 175)" }}>Valor total</div>
-                        <div style={{ marginTop: 8, fontSize: 32, fontWeight: 900 }}>
-                            {(screen as any).totalPrice}
+                        Veja onde você vai se hospedar
+                    </button>
+                </div>
+            ) : (
+                <div
+                    style={{
+                        position: "relative",
+                        zIndex: 1,
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        padding: 24,
+                        paddingTop: isHero ? 24 : 60,
+                        paddingBottom: 40,
+                        overflowY: "auto",
+                    }}
+                >
+                    {screen.includedStatus && !isHero && !isSummary && (
+                        <div style={{ marginBottom: 12 }}>
+                            <IncludedBadge status={screen.includedStatus} />
                         </div>
-                        <div style={{ marginTop: 8, fontSize: 13, color: "rgb(156, 163, 175)" }}>
-                            Parcelamos em até 10x sem juros
+                    )}
+
+                    <h1
+                        style={{
+                            margin: 0,
+                            fontSize: 24,
+                            fontWeight: 900,
+                            color: "rgb(17, 24, 39)",
+                            lineHeight: 1.2,
+                        }}
+                    >
+                        {screen.title}
+                    </h1>
+
+                    {screen.subtitle && (
+                        <p
+                            style={{
+                                margin: 0,
+                                marginTop: 8,
+                                fontSize: 16,
+                                color: "rgb(107, 114, 128)",
+                                lineHeight: 1.4,
+                            }}
+                        >
+                            {screen.subtitle}
+                        </p>
+                    )}
+
+                    {screen.body && (
+                        <p
+                            style={{
+                                margin: 0,
+                                marginTop: 16,
+                                fontSize: 15,
+                                color: "rgb(55, 65, 81)",
+                                lineHeight: 1.6,
+                                whiteSpace: "pre-line",
+                            }}
+                        >
+                            {screen.body}
+                        </p>
+                    )}
+
+                    {isHotel && screen.hotelCarouselImageUrls && (
+                        <div style={{ marginTop: 20 }}>
+                            <HotelCarousel imageUrls={screen.hotelCarouselImageUrls || []} />
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+
+                    {isExperiences && (screen as any).experienceItems && (
+                        <div
+                            style={{
+                                marginTop: 20,
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: 12,
+                            }}
+                        >
+                            {(screen as any).experienceItems.map((exp: any, i: number) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        padding: 14,
+                                        borderRadius: 14,
+                                        background: "rgb(249, 250, 251)",
+                                        border: "1px solid rgb(229, 231, 235)",
+                                    }}
+                                >
+                                    <div style={{ fontSize: 24 }}>{exp.icon}</div>
+                                    <div style={{ marginTop: 8, fontWeight: 700, fontSize: 14 }}>{exp.title}</div>
+                                    <div style={{ marginTop: 4, fontSize: 12, color: "rgb(107, 114, 128)" }}>{exp.subtitle}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {isFlight && (screen as any).flightData && (
+                        <FlightCard data={(screen as any).flightData} />
+                    )}
+
+                    {isSummary && (screen as any).totalPrice && (
+                        <div
+                            style={{
+                                marginTop: 24,
+                                padding: 20,
+                                borderRadius: 16,
+                                background: "rgb(17, 24, 39)",
+                                color: "rgb(255, 255, 255)",
+                                textAlign: "center",
+                            }}
+                        >
+                            <div style={{ fontSize: 14, color: "rgb(156, 163, 175)" }}>Valor total</div>
+                            <div style={{ marginTop: 8, fontSize: 32, fontWeight: 900 }}>
+                                {(screen as any).totalPrice}
+                            </div>
+                            <div style={{ marginTop: 8, fontSize: 13, color: "rgb(156, 163, 175)" }}>
+                                Parcelamos em até 10x sem juros
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {index < total - 1 && (
                 <ScrollHint light={isHero} />
