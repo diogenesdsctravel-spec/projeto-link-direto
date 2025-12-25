@@ -1,0 +1,314 @@
+/* BudgetScreen.module.css - Resumo do Pacote e Pagamento */
+
+.container {
+    min-height: 100vh;
+    background: #f9fafb;
+    scroll-snap-align: start;
+}
+
+/* Header */
+.header {
+    background: #09077d;
+    padding: 64px 24px 32px 24px;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 24px;
+    font-size: 16px;
+}
+
+.backIcon {
+    width: 24px;
+    height: 24px;
+}
+
+.headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.headerTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.stepBadge {
+    background: #50cfad;
+    padding: 4px 12px;
+    border-radius: 50px;
+}
+
+.stepText {
+    font-size: 14px;
+    font-weight: 600;
+    color: #09077d;
+}
+
+.headerSubtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Content */
+.content {
+    padding: 24px;
+    padding-bottom: 32px;
+    margin-top: -16px;
+}
+
+/* Cards */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #09077d;
+    margin: 0 0 16px 0;
+}
+
+/* Trip Details Items */
+.detailsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detailItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.detailIconWrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(80, 207, 173, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detailIcon {
+    width: 20px;
+    height: 20px;
+    color: #50cfad;
+}
+
+.detailText {
+    font-size: 15px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.detailSubtext {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 2px 0 0 0;
+}
+
+/* Package Price Row */
+.priceRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+}
+
+.priceLabel {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+}
+
+.priceDescription {
+    font-size: 16px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.priceValue {
+    font-size: 24px;
+    font-weight: 600;
+    color: #09077d;
+}
+
+/* Additional Items */
+.additionalItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.additionalItem:last-child {
+    border-bottom: none;
+}
+
+.additionalName {
+    font-size: 15px;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.additionalDetails {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.additionalPrice {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+/* Total Price Card */
+.totalCard {
+    background: #09077d;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(9, 7, 125, 0.3);
+}
+
+.totalLabel {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 8px 0;
+}
+
+.totalValue {
+    text-align: center;
+    font-size: 48px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+}
+
+.installmentText {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 16px 0;
+}
+
+/* Payment Options Box */
+.paymentOptions {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.paymentRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.paymentRowMain {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.paymentRowSecondary {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.paymentLabel {
+    opacity: 0.8;
+}
+
+.paymentValue {
+    font-weight: 500;
+}
+
+/* Included Items Card */
+.includedCard {
+    background: rgba(80, 207, 173, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.includedTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #09077d;
+    margin: 0 0 12px 0;
+}
+
+.includedGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.includedItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.includedIcon {
+    width: 16px;
+    height: 16px;
+    color: #50cfad;
+}
+
+.includedText {
+    font-size: 13px;
+    color: #374151;
+}
+
+/* CTA Button */
+.ctaButton {
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: none;
+    background-color: #50cfad;
+    color: #09077d;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
+    margin-bottom: 16px;
+    transition: opacity 0.2s ease;
+}
+
+.ctaButton:active {
+    opacity: 0.9;
+}
+
+/* Footer Text */
+.footerText {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 0 16px;
+    margin: 0;
+}

@@ -1,0 +1,249 @@
+/* ReturnFlightOverview.module.css - Overview do Voo de Volta */
+
+.container {
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    scroll-snap-align: start;
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, transparent 30%, rgba(9, 7, 125, 0.95) 100%);
+    z-index: 1;
+}
+
+.content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 24px;
+    padding-bottom: 32px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+/* Badges */
+.badges {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.badgeIcon {
+    width: 16px;
+    height: 16px;
+    color: #50cfad;
+}
+
+.badgeText {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Title section */
+.title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.15;
+    margin: 0 0 12px 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+}
+
+/* Flight Card */
+.flightCard {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.flightRoute {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.flightPoint {
+    text-align: left;
+}
+
+.flightPointRight {
+    text-align: right;
+}
+
+.flightTime {
+    font-size: 36px;
+    font-weight: 600;
+    color: #09077d;
+    margin-bottom: 4px;
+}
+
+.flightCode {
+    font-size: 14px;
+    font-weight: 600;
+    color: #50cfad;
+}
+
+.flightCity {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+/* Duration middle section */
+.flightMiddle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px;
+}
+
+.flightDuration {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.flightLine {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.flightLineBorder {
+    flex: 1;
+    height: 1px;
+    background: #d1d5db;
+}
+
+.flightPlaneIcon {
+    width: 20px;
+    height: 20px;
+    color: #50cfad;
+    margin: 0 8px;
+    transform: rotate(-90deg);
+}
+
+.flightAirline {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+/* Baggage section */
+.baggageSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.baggageItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.baggageIconIncluded {
+    color: #50cfad;
+}
+
+.baggageIconNotIncluded {
+    color: #d1d5db;
+}
+
+.baggageIconSmall {
+    width: 16px;
+    height: 16px;
+}
+
+.baggageIconMedium {
+    width: 20px;
+    height: 20px;
+}
+
+.baggageIconLarge {
+    width: 24px;
+    height: 24px;
+}
+
+.baggageText {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.baggageTextDisabled {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* CTA Button */
+.button {
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: none;
+    background-color: #50cfad;
+    color: #09077d;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
+    transition: opacity 0.2s ease;
+}
+
+.button:active {
+    opacity: 0.9;
+}
+
+.buttonArrow {
+    font-size: 20px;
+}
