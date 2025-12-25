@@ -207,7 +207,8 @@ export default function TemplateSetup() {
         <div style={{
             minHeight: "100vh",
             background: "#f9fafb",
-            fontFamily: "system-ui"
+            fontFamily: "system-ui",
+            overflow: "auto"
         }}>
             {/* Header */}
             <div style={{

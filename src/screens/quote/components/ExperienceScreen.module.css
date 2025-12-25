@@ -1,0 +1,136 @@
+.container {
+    height: calc(100vh - 200px);
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    scroll-snap-align: start;
+    touch-action: pan-x;
+}
+
+.slideBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.5s ease;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.85) 100%);
+    z-index: 1;
+}
+
+.content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 24px;
+    padding-bottom: 32px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.headerTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.pagination {
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.experienceInfo {
+    margin-bottom: 24px;
+    color: #ffffff;
+}
+
+.experienceName {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 12px 0;
+}
+
+.experienceSubtitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: #50cfad;
+    line-height: 1.4;
+    margin: 0 0 16px 0;
+}
+
+.experienceDescription {
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.dot {
+    height: 4px;
+    border-radius: 2px;
+    background-color: #ffffff;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dotActive {
+    width: 24px;
+    opacity: 1;
+}
+
+.dotInactive {
+    width: 8px;
+    opacity: 0.4;
+}
+
+.button {
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: 9999px;
+    border: none;
+    background-color: #50cfad;
+    color: #09077d;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.button:active {
+    opacity: 0.9;
+}

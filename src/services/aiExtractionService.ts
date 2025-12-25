@@ -21,36 +21,36 @@ REGRAS CRÍTICAS PARA IDENTIFICAR ORIGEM E DESTINO:
 ═══════════════════════════════════════════════════════════════
 
 1. ORIGEM DO CLIENTE = primeiro aeroporto do VOO DE IDA (de onde o avião DECOLA)
-2. DESTINO DA VIAGEM = último aeroporto do VOO DE IDA (onde o avião POUSA)
 
-3. Para identificar o DESTINO TURÍSTICO (campo "destination"):
-   - PRIORIZE o nome do HOTEL - ele indica a cidade turística real
-   - Exemplo: "Bella Gramado Resort" → destino é "Gramado"
-   - Exemplo: "Hotel Krystal Cancún" → destino é "Cancún"
-   - O aeroporto de destino pode ser em cidade próxima (POA→Gramado, CUN→Riviera Maya)
+2. DESTINO TURÍSTICO (campo "destination"):
+   
+   USE SEU CONHECIMENTO DE MUNDO para identificar onde o hotel REALMENTE fica:
+   - "Pousada La Sierra" → Campos do Jordão (não São Paulo)
+   - "Bella Gramado Resort" → Gramado (não Porto Alegre)
+   - "Hotel & Spa do Vinho" → Bento Gonçalves (não Porto Alegre)
+   - "Hotel & Spa do Vinho Autograph Collection" → Bento Gonçalves
+   - "Krystal Cancún" → Cancún
+   
+   O AEROPORTO DE CHEGADA frequentemente NÃO é o destino turístico:
+   - POA (Porto Alegre) serve: Gramado, Canela, Bento Gonçalves
+   - GRU/CGH (São Paulo) serve: Campos do Jordão, Atibaia, Monte Verde
+   - FLN (Florianópolis) serve: praias de SC
+   - SDU/GIG (Rio) serve: Búzios, Angra dos Reis, Paraty
+   
+   SEMPRE pesquise em seu conhecimento: "Onde fica [NOME DO HOTEL]?"
+   
+   Se não souber onde o hotel fica, use: "Destino a confirmar"
 
-4. IGNORE para definir destino:
-   - Nome da agência de viagens (geralmente no rodapé/header)
+3. IGNORE para definir destino:
+   - Nome da agência de viagens
    - Cidade de origem do cliente
-   - Referências à cidade onde a agência fica localizada
-
-5. Se o título do PDF menciona duas cidades como "Viagem para X + Y":
-   - A primeira geralmente é o aeroporto de destino
-   - A segunda pode ser a origem OU uma referência à agência
-   - SEMPRE valide pelo HOTEL e pelos VOOS
-
-EXEMPLO DE ANÁLISE:
-- Título: "Viagem para Porto Alegre + Vitória da Conquista"
-- Voo IDA: VDC 10:45 → POA 16:55
-- Hotel: "Bella Gramado Resort"
-- CONCLUSÃO: 
-  - origin = "Vitória da Conquista" (VDC é o primeiro aeroporto)
-  - destination = "Gramado" (nome do hotel indica destino turístico)
+   - Título do PDF que menciona cidades
+   - Aeroporto de chegada (use apenas como pista secundária)
 
 ═══════════════════════════════════════════════════════════════
 
 EXTRAIA:
-- Destino TURÍSTICO (baseado no hotel, não no título)
+- Destino TURÍSTICO (baseado na LOCALIZAÇÃO REAL do hotel)
 - Origem do cliente (primeiro aeroporto do voo de ida)
 - Datas de ida e volta
 - TODOS os voos com: companhia, número, horários, aeroportos, duração
@@ -62,7 +62,7 @@ EXTRAIA:
 Retorne APENAS JSON válido, sem markdown ou explicações.
 
 {
-  "destination": "cidade turística (baseado no HOTEL)",
+  "destination": "cidade turística onde o HOTEL fica (use conhecimento de mundo)",
   "destinationAirport": "código do aeroporto de destino",
   "origin": "cidade de origem do cliente",
   "originAirport": "código do aeroporto de origem",

@@ -12,6 +12,7 @@ import BriefScreen2 from "./components/BriefScreen2"
 import BriefScreen3 from "./components/BriefScreen3"
 import HeroScreen from "./components/HeroScreen"
 import HotelScreen from "./components/HotelScreen"
+import ExperienceScreen from "./components/ExperienceScreen"
 import ScreenView from "./components/ScreenView"
 
 const BRIEF_SCREENS_COUNT = 3
@@ -113,8 +114,13 @@ export default function QuoteVersion() {
     const destinationScreens = template.screens
     const heroScreen = destinationScreens.find(s => s.type === "hero")
     const hotelScreen = destinationScreens.find(s => s.type === "hotel")
-    const otherScreens = destinationScreens.filter(s => s.type !== "hero" && s.type !== "hotel")
+    const otherScreens = destinationScreens.filter(s =>
+        s.type !== "hero" && s.type !== "hotel" && s.type !== "experiences"
+    )
     const totalScreens = BRIEF_SCREENS_COUNT + destinationScreens.length
+
+    // Experiências do template
+    const experiences = template.experiences || []
 
     return (
         <div ref={containerRef} id="quote-container" className={styles.container}>
@@ -137,14 +143,22 @@ export default function QuoteVersion() {
                 />
             )}
 
-            {/* DESTINO: OUTRAS TELAS */}
+            {/* EXPERIÊNCIAS: TELA COM CARROSSEL DE EXPERIÊNCIAS */}
+            {experiences.length > 0 && (
+                <ExperienceScreen
+                    experiences={experiences}
+                    destination={destination}
+                />
+            )}
+
+            {/* DESTINO: OUTRAS TELAS (voos, resumo, etc) */}
             {otherScreens.map((screen, index) => (
                 <ScreenView
                     key={screen.screenId}
                     screen={screen}
-                    index={BRIEF_SCREENS_COUNT + 2 + index}
+                    index={BRIEF_SCREENS_COUNT + 3 + index}
                     total={totalScreens}
-                    isActive={currentIndex === BRIEF_SCREENS_COUNT + 2 + index}
+                    isActive={currentIndex === BRIEF_SCREENS_COUNT + 3 + index}
                 />
             ))}
         </div>
