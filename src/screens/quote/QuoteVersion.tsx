@@ -11,6 +11,7 @@ import BriefScreen1 from "./components/BriefScreen1"
 import BriefScreen2 from "./components/BriefScreen2"
 import BriefScreen3 from "./components/BriefScreen3"
 import HeroScreen from "./components/HeroScreen"
+import HotelScreen from "./components/HotelScreen"
 import ScreenView from "./components/ScreenView"
 
 const BRIEF_SCREENS_COUNT = 3
@@ -103,9 +104,16 @@ export default function QuoteVersion() {
         )
     }
 
+    // Extrair dados do quote para passar aos componentes
+    const extractedData = (quote as any).extractedData
+    const destination = extractedData?.destination || template.destinationName || "Destino"
+    const nights = extractedData?.hotel?.nights || extractedData?.totalNights || 7
+
+    // Separar telas por tipo
     const destinationScreens = template.screens
     const heroScreen = destinationScreens.find(s => s.type === "hero")
-    const otherScreens = destinationScreens.filter(s => s.type !== "hero")
+    const hotelScreen = destinationScreens.find(s => s.type === "hotel")
+    const otherScreens = destinationScreens.filter(s => s.type !== "hero" && s.type !== "hotel")
     const totalScreens = BRIEF_SCREENS_COUNT + destinationScreens.length
 
     return (
@@ -120,14 +128,23 @@ export default function QuoteVersion() {
                 <HeroScreen screen={heroScreen} />
             )}
 
+            {/* HOTEL: TELA DO HOTEL COM CARROSSEL */}
+            {hotelScreen && (
+                <HotelScreen
+                    screen={hotelScreen}
+                    destination={destination}
+                    nights={nights}
+                />
+            )}
+
             {/* DESTINO: OUTRAS TELAS */}
             {otherScreens.map((screen, index) => (
                 <ScreenView
                     key={screen.screenId}
                     screen={screen}
-                    index={BRIEF_SCREENS_COUNT + 1 + index}
+                    index={BRIEF_SCREENS_COUNT + 2 + index}
                     total={totalScreens}
-                    isActive={currentIndex === BRIEF_SCREENS_COUNT + 1 + index}
+                    isActive={currentIndex === BRIEF_SCREENS_COUNT + 2 + index}
                 />
             ))}
         </div>
