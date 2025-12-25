@@ -1,8 +1,19 @@
+/* QuoteVersion.module.css */
+
 .container {
     height: 100vh;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
+}
+
+/* Cada tela ocupa a altura da viewport com scroll snap */
+.screenSnap {
+    height: 100vh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    overflow: hidden;
 }
 
 .loadingContainer {
