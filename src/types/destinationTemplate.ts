@@ -6,6 +6,7 @@ export type ExperienceTemplate = {
     experienceId: string
     title: string
     subtitle?: string
+    description?: string
     imageUrl?: string
 }
 

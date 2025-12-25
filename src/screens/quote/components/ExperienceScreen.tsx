@@ -88,9 +88,6 @@ export default function ExperienceScreen({ experiences, destination }: Experienc
             <div className={styles.content}>
                 <div className={styles.header}>
                     <h2 className={styles.headerTitle}>Experiências que te esperam</h2>
-                    <span className={styles.pagination}>
-                        {currentSlide + 1}/{experiences.length}
-                    </span>
                 </div>
 
                 <div className={styles.spacer} />
@@ -100,6 +97,11 @@ export default function ExperienceScreen({ experiences, destination }: Experienc
 
                     {currentExperience.subtitle && (
                         <p className={styles.experienceSubtitle}>{currentExperience.subtitle}</p>
+                    )}
+
+                    {/* ✅ NOVO: Exibir description */}
+                    {currentExperience.description && (
+                        <p className={styles.experienceDescription}>{currentExperience.description}</p>
                     )}
                 </div>
 

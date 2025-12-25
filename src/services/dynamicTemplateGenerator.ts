@@ -296,7 +296,8 @@ function generateExperiencesScreen(
         experienceItems: experiences.map(exp => ({
             icon: exp.icon,
             title: exp.title,
-            subtitle: exp.subtitle
+            subtitle: exp.subtitle,
+            description: (exp as any).description || ""  // ✅ CORREÇÃO: Incluir description
         }))
     }
 }
@@ -304,39 +305,39 @@ function generateExperiencesScreen(
 /**
  * Experiências padrão por destino (fallback)
  */
-function getDefaultExperiences(destination: string): Array<{ icon: string; title: string; subtitle: string }> {
+function getDefaultExperiences(destination: string): Array<{ icon: string; title: string; subtitle: string; description?: string }> {
     const lowerDest = destination.toLowerCase()
 
     if (lowerDest.includes("cancun") || lowerDest.includes("cancún")) {
         return [
-            { icon: "🏛️", title: "Chichén Itzá", subtitle: "A 7ª maravilha do mundo" },
-            { icon: "🐬", title: "Nado com golfinhos", subtitle: "Experiência inesquecível" },
-            { icon: "🚤", title: "Isla Mujeres", subtitle: "Praias paradisíacas" },
-            { icon: "🤿", title: "Snorkel em recifes", subtitle: "Vida marinha incrível" },
-            { icon: "🌮", title: "Gastronomia mexicana", subtitle: "Sabores autênticos" },
-            { icon: "🎉", title: "Vida noturna", subtitle: "Baladas à beira-mar" }
+            { icon: "🏛️", title: "Chichén Itzá", subtitle: "A 7ª maravilha do mundo", description: "Visite a pirâmide de Kukulcán e sinta a energia milenar dos Maias. O complexo arqueológico impressiona pela precisão astronômica e grandiosidade." },
+            { icon: "🐬", title: "Nado com golfinhos", subtitle: "Experiência inesquecível", description: "Interaja com golfinhos em águas cristalinas. Uma conexão única com a natureza que ficará para sempre na memória." },
+            { icon: "🚤", title: "Isla Mujeres", subtitle: "Praias paradisíacas", description: "Navegue até esta ilha encantadora com praias de areia branca. Explore as ruas coloridas e mergulhe no mar caribenho." },
+            { icon: "🤿", title: "Snorkel em recifes", subtitle: "Vida marinha incrível", description: "Descubra o segundo maior recife de corais do mundo. Peixes coloridos e tartarugas nadam ao seu lado." },
+            { icon: "🌮", title: "Gastronomia mexicana", subtitle: "Sabores autênticos", description: "Prove tacos al pastor, ceviche fresco e guacamole preparado na hora. Cada refeição é uma festa de sabores." },
+            { icon: "🎉", title: "Vida noturna", subtitle: "Baladas à beira-mar", description: "Dance até o amanhecer nos clubes mais famosos do Caribe. A energia de Cancún não para quando o sol se põe." }
         ]
     }
 
     if (lowerDest.includes("buenos")) {
         return [
-            { icon: "🥩", title: "Jantar em parrilla", subtitle: "Carne argentina no ponto perfeito" },
-            { icon: "💃", title: "Show de tango", subtitle: "A alma de Buenos Aires" },
-            { icon: "🍷", title: "Degustação de Malbec", subtitle: "Os melhores vinhos argentinos" },
-            { icon: "🏛️", title: "Tour por Recoleta", subtitle: "Arte, história e arquitetura" },
-            { icon: "⚽", title: "La Bombonera", subtitle: "O templo do futebol argentino" },
-            { icon: "🛍️", title: "Compras em Palermo", subtitle: "Moda e design local" }
+            { icon: "🥩", title: "Jantar em parrilla", subtitle: "Carne argentina no ponto perfeito", description: "Saboreie o melhor corte de carne do mundo, grelhado lentamente sobre brasas. Uma experiência gastronômica incomparável." },
+            { icon: "💃", title: "Show de tango", subtitle: "A alma de Buenos Aires", description: "Assista a dançarinos apaixonados em um show de tango autêntico. A música e os movimentos contam histórias de amor e saudade." },
+            { icon: "🍷", title: "Degustação de Malbec", subtitle: "Os melhores vinhos argentinos", description: "Prove os Malbecs premiados em uma vinícola tradicional. O sommelier guia você pelos aromas e sabores únicos." },
+            { icon: "🏛️", title: "Tour por Recoleta", subtitle: "Arte, história e arquitetura", description: "Caminhe pelo bairro mais elegante da cidade. Visite o famoso cemitério onde descansa Evita Perón." },
+            { icon: "⚽", title: "La Bombonera", subtitle: "O templo do futebol argentino", description: "Sinta a vibração do estádio do Boca Juniors. Mesmo vazio, as paredes contam histórias de glórias e paixão." },
+            { icon: "🛍️", title: "Compras em Palermo", subtitle: "Moda e design local", description: "Explore as lojas de designers argentinos em Palermo Soho. Peças únicas que você não encontra em outro lugar." }
         ]
     }
 
     // Fallback genérico
     return [
-        { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos" },
-        { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos" },
-        { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local" },
-        { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis" },
-        { icon: "🛍️", title: "Compras", subtitle: "Produtos locais" },
-        { icon: "🎭", title: "Entretenimento", subtitle: "Shows e eventos" }
+        { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos", description: "Descubra os lugares mais icônicos do destino. Cada foto conta uma história que você vai querer compartilhar." },
+        { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos", description: "Prove os pratos que definem a cultura local. Cada refeição é uma viagem pelos sabores da região." },
+        { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local", description: "Explore museus, monumentos e construções históricas. Entenda a alma do lugar através de sua história." },
+        { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis", description: "Contemple cenários de tirar o fôlego. Momentos perfeitos para pausar e absorver a beleza ao redor." },
+        { icon: "🛍️", title: "Compras", subtitle: "Produtos locais", description: "Leve um pedaço do destino com você. Artesanatos e produtos típicos que contam histórias." },
+        { icon: "🎭", title: "Entretenimento", subtitle: "Shows e eventos", description: "Vivencie a energia local em shows e apresentações. A cultura viva que pulsa no coração do destino." }
     ]
 }
 
@@ -396,14 +397,15 @@ export async function generateDynamicTemplateAsync(
         generateSummaryScreen(extractedData, clientName)
     ]
 
-    // Experiências para a lista
+    // ✅ CORREÇÃO: Experiências agora incluem description
     const experiences: ExperienceTemplate[] = (destinationData?.experiences || getDefaultExperiences(destination)).map(
         (exp, index) => ({
             experienceId: `exp-${index}`,
             icon: exp.icon,
             title: exp.title,
             subtitle: exp.subtitle,
-            imageUrl: exp.imageUrl || ""
+            description: (exp as any).description || "",  // ✅ ADICIONADO
+            imageUrl: (exp as any).imageUrl || ""
         })
     )
 
@@ -435,11 +437,13 @@ export function generateDynamicTemplate(
         generateSummaryScreen(extractedData, clientName)
     ]
 
+    // ✅ CORREÇÃO: Experiências agora incluem description
     const experiences: ExperienceTemplate[] = getDefaultExperiences(destination).map((exp, index) => ({
         experienceId: `exp-${index}`,
         icon: exp.icon,
         title: exp.title,
         subtitle: exp.subtitle,
+        description: exp.description || "",  // ✅ ADICIONADO
         imageUrl: ""
     }))
 

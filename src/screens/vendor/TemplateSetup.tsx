@@ -13,6 +13,7 @@ import type { ExtractedQuoteData } from "../../types/extractedQuoteData"
 type TemplateExperience = Experience & {
     imageUrl?: string
     searchTerm?: string
+    description?: string  // ADICIONADO
 }
 
 /**
@@ -23,10 +24,10 @@ type TemplateExperience = Experience & {
  */
 
 const DEFAULT_EXPERIENCES: TemplateExperience[] = [
-    { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos", imageUrl: "" },
-    { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos", imageUrl: "" },
-    { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local", imageUrl: "" },
-    { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis", imageUrl: "" },
+    { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos", imageUrl: "", description: "" },
+    { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos", imageUrl: "", description: "" },
+    { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local", imageUrl: "", description: "" },
+    { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis", imageUrl: "", description: "" },
 ]
 
 export default function TemplateSetup() {
@@ -97,6 +98,7 @@ export default function TemplateSetup() {
                     icon: exp.icon || "📍",
                     title: exp.title,
                     subtitle: exp.subtitle,
+                    description: exp.description || "",  // ✅ CORREÇÃO: Agora inclui description
                     imageUrl: "",
                     searchTerm: exp.searchTerm
                 }))
@@ -142,7 +144,7 @@ export default function TemplateSetup() {
                 heroSubtext,
                 experiences: experiences
                     .filter((e) => e.title)
-                    .map(({ searchTerm, ...rest }) => rest as Experience)
+                    .map(({ searchTerm, ...rest }) => rest as Experience)  // ✅ description já está incluído via spread
             })
 
             setStep("hotel")
@@ -480,7 +482,7 @@ export default function TemplateSetup() {
                                         type="text"
                                         value={exp.subtitle}
                                         onChange={(e) => updateExperience(idx, "subtitle", e.target.value)}
-                                        placeholder="Breve descrição"
+                                        placeholder="Frase de impacto (gancho emocional)"
                                         style={{
                                             width: "100%",
                                             padding: "8px 10px",
@@ -489,6 +491,24 @@ export default function TemplateSetup() {
                                             fontSize: 13,
                                             marginBottom: 8,
                                             boxSizing: "border-box"
+                                        }}
+                                    />
+
+                                    {/* ✅ NOVO: Campo de descrição */}
+                                    <textarea
+                                        value={exp.description || ""}
+                                        onChange={(e) => updateExperience(idx, "description", e.target.value)}
+                                        placeholder="Descrição (2-3 frases convidativas sobre a experiência)"
+                                        rows={2}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px 10px",
+                                            borderRadius: 6,
+                                            border: "1px solid #d1d5db",
+                                            fontSize: 12,
+                                            marginBottom: 8,
+                                            boxSizing: "border-box",
+                                            resize: "none"
                                         }}
                                     />
 
@@ -537,6 +557,7 @@ export default function TemplateSetup() {
                                             icon: "📍",
                                             title: "",
                                             subtitle: "",
+                                            description: "",
                                             imageUrl: ""
                                         }
                                     ])

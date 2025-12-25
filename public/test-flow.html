@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Fluxo Completo</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .step {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ddd;
+            text-align: center;
+            line-height: 24px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status.loading {
+            background: #f59e0b;
+            color: white;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #09077d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #ccc;
+        }
+
+        .highlight {
+            color: #50cfad;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔬 Teste do Fluxo Completo</h1>
+    <p>Simula: Extração → Geração de Experiências → Salvamento → Carregamento</p>
+
+    <button onclick="runTest()" id="btn">Iniciar Teste</button>
+
+    <div id="steps"></div>
+
+    <script>
+        const OPENAI_API_KEY = prompt("Cole sua OPENAI_API_KEY:");
+
+        const stepsContainer = document.getElementById('steps');
+
+        function addStep(id, title) {
+            stepsContainer.innerHTML += `
+                <div class="step" id="step-${id}">
+                    <h3><span class="status" id="status-${id}">⏳</span> ${title}</h3>
+                    <div id="content-${id}"></div>
+                </div>
+            `;
+        }
+
+        function updateStep(id, status, content) {
+            const statusEl = document.getElementById(`status-${id}`);
+            const contentEl = document.getElementById(`content-${id}`);
+
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = status === 'success' ? '✓' : status === 'error' ? '✗' : '...';
+            contentEl.innerHTML = content;
+        }
+
+        async function runTest() {
+            const btn = document.getElementById('btn');
+            btn.disabled = true;
+            stepsContainer.innerHTML = '';
+
+            const destination = "Cancún";
+
+            // ========== STEP 1: Simular extração ==========
+            addStep(1, "Simular dados extraídos do PDF");
+            const extractedData = {
+                destination: "Cancún",
+                origin: "São Paulo",
+                hotel: { name: "Krystal Cancún", stars: 4 },
+                totalPrice: "R$ 8.500"
+            };
+            updateStep(1, 'success', `<pre>${JSON.stringify(extractedData, null, 2)}</pre>`);
+
+            // ========== STEP 2: Chamar cérebro de experiências ==========
+            addStep(2, "Chamar generateExperiencesForDestination()");
+            updateStep(2, 'loading', '<p>Chamando OpenAI...</p>');
+
+            let experiences = [];
+            try {
+                experiences = await generateExperiencesForDestination(destination);
+
+                const hasDescription = experiences.every(e => e.description && e.description.length > 10);
+
+                updateStep(2, hasDescription ? 'success' : 'error', `
+                    <p>${experiences.length} experiências geradas</p>
+                    <p>Todas têm description? <strong class="${hasDescription ? 'highlight' : ''}">${hasDescription ? 'SIM ✓' : 'NÃO ✗'}</strong></p>
+                    <pre>${JSON.stringify(experiences, null, 2)}</pre>
+                `);
+            } catch (err) {
+                updateStep(2, 'error', `<p>Erro: ${err.message}</p>`);
+                btn.disabled = false;
+                return;
+            }
+
+            // ========== STEP 3: Simular o que TemplateSetup faz ==========
+            addStep(3, "Simular mapeamento do TemplateSetup");
+
+            // Isso é o que o TemplateSetup.tsx faz na função generateSuggestions()
+            const mappedExperiences = experiences.map(exp => ({
+                icon: exp.icon || "📍",
+                title: exp.title,
+                subtitle: exp.subtitle,
+                imageUrl: "",
+                searchTerm: exp.searchTerm
+                // PROBLEMA: description não está sendo mapeado!
+            }));
+
+            const hasDescriptionAfterMap = mappedExperiences.every(e => e.description && e.description.length > 10);
+
+            updateStep(3, hasDescriptionAfterMap ? 'success' : 'error', `
+                <p>Após mapeamento do TemplateSetup:</p>
+                <p>Todas têm description? <strong style="color: ${hasDescriptionAfterMap ? '#10b981' : '#ef4444'}">${hasDescriptionAfterMap ? 'SIM ✓' : 'NÃO ✗ - AQUI ESTÁ O BUG!'}</strong></p>
+                <pre>${JSON.stringify(mappedExperiences, null, 2)}</pre>
+            `);
+
+            // ========== STEP 4: Mostrar correção ==========
+            addStep(4, "Correção necessária");
+
+            const correctedMapping = experiences.map(exp => ({
+                icon: exp.icon || "📍",
+                title: exp.title,
+                subtitle: exp.subtitle,
+                description: exp.description,  // ADICIONAR ISSO!
+                imageUrl: "",
+                searchTerm: exp.searchTerm
+            }));
+
+            updateStep(4, 'success', `
+                <p>O mapeamento correto deve incluir <code>description</code>:</p>
+                <pre>const mappedExperiences = experiences.map(exp => ({
+    icon: exp.icon || "📍",
+    title: exp.title,
+    subtitle: exp.subtitle,
+    description: exp.description,  // ← ADICIONAR ISSO!
+    imageUrl: "",
+    searchTerm: exp.searchTerm
+}))</pre>
+                <p>Resultado com correção:</p>
+                <pre>${JSON.stringify(correctedMapping, null, 2)}</pre>
+            `);
+
+            btn.disabled = false;
+        }
+
+        // Função copiada do experienceGeneratorService.ts
+        async function generateExperiencesForDestination(destination) {
+            const EXPERIENCE_PROMPT = `Você é um copywriter especializado em turismo de luxo.
+
+Sua tarefa: gerar 6 experiências ICÔNICAS para o destino informado.
+
+FORMATO OBRIGATÓRIO (retorne APENAS um array JSON):
+[
+  {
+    "icon": "emoji",
+    "title": "Nome do lugar (1-3 palavras)",
+    "subtitle": "Frase de impacto emocional (5-10 palavras)",
+    "description": "2-3 frases sensoriais e convidativas. Faça o turista se imaginar lá.",
+    "searchTerm": "termo para buscar foto"
+  }
+]
+
+REGRAS:
+- description é OBRIGATÓRIO e deve ter 2-3 frases
+- Use verbos de ação ("caminhe", "prove", "sinta")
+- Tom convidativo e sensorial
+
+Retorne APENAS o array JSON.`;
+
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        { role: "system", content: EXPERIENCE_PROMPT },
+                        { role: "user", content: `Gere 6 experiências icônicas para: ${destination}` }
+                    ],
+                    max_tokens: 2000,
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            const content = data.choices[0]?.message?.content || "[]";
+
+            const cleanJson = content
+                .replace(/```json\n?/g, "")
+                .replace(/```\n?/g, "")
+                .trim();
+
+            return JSON.parse(cleanJson);
+        }
+    </script>
+</body>
+
+</html>

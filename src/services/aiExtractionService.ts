@@ -1,14 +1,15 @@
 /**
  * AI EXTRACTION SERVICE - VERSÃO CORRIGIDA
- * 
+ *
  * Estratégia:
  * - Imagens: envia direto para OpenAI Vision
  * - PDFs: converte para imagens usando pdf.js e canvas, depois envia
- * 
+ *
  * CORREÇÃO: Prompt melhorado para identificar destino TURÍSTICO corretamente
  */
 
 import type { ExtractedQuoteData, ExtractionResult } from "../types/extractedQuoteData"
+import { generateExperiencesForDestination } from "./experienceGeneratorService"
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 
@@ -23,22 +24,22 @@ REGRAS CRÍTICAS PARA IDENTIFICAR ORIGEM E DESTINO:
 1. ORIGEM DO CLIENTE = primeiro aeroporto do VOO DE IDA (de onde o avião DECOLA)
 
 2. DESTINO TURÍSTICO (campo "destination"):
-   
+
    USE SEU CONHECIMENTO DE MUNDO para identificar onde o hotel REALMENTE fica:
    - "Pousada La Sierra" → Campos do Jordão (não São Paulo)
    - "Bella Gramado Resort" → Gramado (não Porto Alegre)
    - "Hotel & Spa do Vinho" → Bento Gonçalves (não Porto Alegre)
    - "Hotel & Spa do Vinho Autograph Collection" → Bento Gonçalves
    - "Krystal Cancún" → Cancún
-   
+
    O AEROPORTO DE CHEGADA frequentemente NÃO é o destino turístico:
    - POA (Porto Alegre) serve: Gramado, Canela, Bento Gonçalves
    - GRU/CGH (São Paulo) serve: Campos do Jordão, Atibaia, Monte Verde
    - FLN (Florianópolis) serve: praias de SC
    - SDU/GIG (Rio) serve: Búzios, Angra dos Reis, Paraty
-   
+
    SEMPRE pesquise em seu conhecimento: "Onde fica [NOME DO HOTEL]?"
-   
+
    Se não souber onde o hotel fica, use: "Destino a confirmar"
 
 3. IGNORE para definir destino:
@@ -67,7 +68,7 @@ Retorne APENAS JSON válido, sem markdown ou explicações.
   "origin": "cidade de origem do cliente",
   "originAirport": "código do aeroporto de origem",
   "travelDate": "data ida",
-  "returnDate": "data volta", 
+  "returnDate": "data volta",
   "totalNights": numero,
   "passengers": "X adultos",
   "outboundFlight": {
@@ -114,40 +115,9 @@ Retorne APENAS JSON válido, sem markdown ou explicações.
   },
   "totalPrice": "R$ X.XXX",
   "quotationDate": "data da cotação",
-  "suggestedExperiences": [
-    {
-      "icon": "emoji apropriado",
-      "title": "Nome da experiência específica do destino",
-      "subtitle": "Breve descrição atrativa",
-      "searchTerm": "termo para buscar foto no Google/Unsplash"
-    }
-  ]
+  "suggestedExperiences": []
 }
-
-IMPORTANTE SOBRE suggestedExperiences:
-
-Gere 6 experiências que são os CLICHÊS VISUAIS ICÔNICOS do destino.
-
-MÉTODO PARA IDENTIFICAR OS CLICHÊS (use esse raciocínio para QUALQUER destino):
-1. "Se eu pesquisar '[DESTINO] o que fazer' no Google, o que aparece primeiro?"
-2. "Se eu buscar #[DESTINO] no Instagram, quais fotos todo mundo posta?"
-3. "O que 10 em 10 blogs de viagem listam como imperdível?"
-4. "Qual imagem vem à mente de qualquer pessoa quando fala esse destino?"
-5. "O que é o CARTÃO-POSTAL oficial do lugar?"
-6. "Qual experiência é SINÔNIMO do destino?"
-
-REGRAS:
-- Use nomes de ATRAÇÕES REAIS E FAMOSAS (Lago Negro, Chichén Itzá, Cristo Redentor)
-- Priorize lugares que APARECEM EM FOTOS (paisagens, monumentos, experiências fotogênicas)
-- Inclua a EXPERIÊNCIA GASTRONÔMICA mais icônica do destino
-- O "searchTerm" deve ser o que um turista digitaria para achar fotos do lugar
-- Pense como um INFLUENCIADOR DE VIAGEM: o que ele postaria?
-
-NÃO FAÇA:
-- Categorias genéricas ("Pontos turísticos", "Gastronomia local", "Cultura e história")
-- Experiências que não rendem foto
-- Lugares obscuros que só moradores conhecem
-- Nomes de lojas ou estabelecimentos comerciais específicos`
+`
 
 /**
  * Converte arquivo para base64
@@ -169,7 +139,6 @@ function fileToBase64(file: File): Promise<string> {
  * Converte PDF para array de imagens base64 usando pdf.js
  */
 async function convertPDFToImages(file: File): Promise<string[]> {
-    // Carregar pdf.js da CDN
     const pdfjsLib = (window as any).pdfjsLib
 
     if (!pdfjsLib) {
@@ -180,28 +149,24 @@ async function convertPDFToImages(file: File): Promise<string[]> {
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
 
     const images: string[] = []
-    const scale = 2.0 // Alta resolução para melhor OCR
+    const scale = 2.0
 
-    // Converter cada página (máximo 8 páginas)
     const maxPages = Math.min(pdf.numPages, 8)
 
     for (let i = 1; i <= maxPages; i++) {
         const page = await pdf.getPage(i)
         const viewport = page.getViewport({ scale })
 
-        // Criar canvas
         const canvas = document.createElement("canvas")
         const context = canvas.getContext("2d")!
         canvas.height = viewport.height
         canvas.width = viewport.width
 
-        // Renderizar página no canvas
         await page.render({
             canvasContext: context,
             viewport: viewport
         }).promise
 
-        // Converter para base64 (JPEG para menor tamanho)
         const base64 = canvas.toDataURL("image/jpeg", 0.9).split(",")[1]
         images.push(base64)
     }
@@ -212,7 +177,9 @@ async function convertPDFToImages(file: File): Promise<string[]> {
 /**
  * Envia imagens para OpenAI Vision
  */
-async function sendToOpenAI(images: Array<{ base64: string; mimeType: string }>): Promise<ExtractedQuoteData> {
+async function sendToOpenAI(
+    images: Array<{ base64: string; mimeType: string }>
+): Promise<ExtractedQuoteData> {
     const imageContents = images.map(img => ({
         type: "image_url" as const,
         image_url: {
@@ -232,10 +199,7 @@ async function sendToOpenAI(images: Array<{ base64: string; mimeType: string }>)
             messages: [
                 {
                     role: "user",
-                    content: [
-                        { type: "text", text: EXTRACTION_PROMPT },
-                        ...imageContents
-                    ]
+                    content: [{ type: "text", text: EXTRACTION_PROMPT }, ...imageContents]
                 }
             ],
             max_tokens: 4000,
@@ -252,7 +216,6 @@ async function sendToOpenAI(images: Array<{ base64: string; mimeType: string }>)
     const data = await response.json()
     const content = data.choices[0]?.message?.content || "{}"
 
-    // Limpar JSON
     const cleanJson = content
         .replace(/```json\n?/g, "")
         .replace(/```\n?/g, "")
@@ -260,8 +223,17 @@ async function sendToOpenAI(images: Array<{ base64: string; mimeType: string }>)
 
     console.log("Resposta OpenAI:", cleanJson)
 
+    const parsedData = JSON.parse(cleanJson)
+
+    // Gerar experiências com o cérebro especializado
+    if (parsedData.destination) {
+        console.log("🧠 Chamando cérebro de experiências...")
+        const experiences = await generateExperiencesForDestination(parsedData.destination)
+        parsedData.suggestedExperiences = experiences
+    }
+
     return {
-        ...JSON.parse(cleanJson),
+        ...parsedData,
         extractedAt: new Date().toISOString()
     }
 }
@@ -276,17 +248,13 @@ export async function extractQuoteFromFile(file: File): Promise<ExtractionResult
         let images: Array<{ base64: string; mimeType: string }> = []
 
         if (file.type === "application/pdf") {
-            // PDF: converter para imagens primeiro
             console.log("Convertendo PDF para imagens...")
             const pdfImages = await convertPDFToImages(file)
             images = pdfImages.map(base64 => ({ base64, mimeType: "image/jpeg" }))
             console.log(`Convertidas ${images.length} páginas`)
-
         } else if (file.type.startsWith("image/")) {
-            // Imagem: usar diretamente
             const base64 = await fileToBase64(file)
             images = [{ base64, mimeType: file.type }]
-
         } else {
             throw new Error("Formato não suportado. Use PDF ou imagem.")
         }
@@ -297,7 +265,6 @@ export async function extractQuoteFromFile(file: File): Promise<ExtractionResult
         console.log("Extração completa:", data)
 
         return { success: true, data }
-
     } catch (error) {
         console.error("Erro:", error)
         return {
@@ -319,19 +286,17 @@ export function isAIConfigured(): boolean {
  */
 export function loadPDFJS(): Promise<void> {
     return new Promise((resolve, reject) => {
-        // Verificar se já está carregado
         if ((window as any).pdfjsLib) {
             resolve()
             return
         }
 
-        // Carregar script
         const script = document.createElement("script")
         script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
         script.onload = () => {
-            // Configurar worker
             const pdfjsLib = (window as any).pdfjsLib
-            pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
             console.log("PDF.js carregado com sucesso")
             resolve()
         }
