@@ -1,10 +1,10 @@
-import styles from "../styles/QuoteVersion.module.css"
+/* ScreenView.tsx */
+
+import styles from "./ScreenView.module.css"
+import shared from "./shared.module.css"
 import type { ScreenTemplate } from "../../../types/destinationTemplate"
 import IncludedBadge from "../../../components/IncludedBadge"
 import HotelCarousel from "../../../components/HotelCarousel"
-import FlightCard from "./FlightCard"
-import Pagination from "./Pagination"
-import ScrollHint from "./ScrollHint"
 
 interface ScreenViewProps {
     screen: ScreenTemplate
@@ -29,66 +29,61 @@ export default function ScreenView({ screen, index, total, isActive }: ScreenVie
     }
 
     return (
-        <div className={styles.screenView}>
-            {/* Background Image */}
+        <div className={styles.container}>
             {screen.imageUrl && (
                 <div
-                    className={styles.screenBackground}
+                    className={styles.background}
                     style={{ backgroundImage: `url(${screen.imageUrl})` }}
                 >
-                    <div className={isHero ? styles.screenOverlayDark : styles.screenOverlayLight} />
+                    <div className={isHero ? styles.overlayDark : styles.overlayLight} />
                 </div>
             )}
 
-            {/* Pagination */}
-            <Pagination index={index} total={total} light={isHero} />
+            <div className={`${styles.pagination} ${isHero ? styles.paginationDark : styles.paginationLight}`}>
+                {index + 1}/{total}
+            </div>
 
-            {/* Content */}
-            <div className={`${styles.screenContent} ${isHero ? styles.screenContentHero : styles.screenContentDefault}`}>
-
-                {/* Hero específico */}
+            <div className={`${styles.content} ${isHero ? styles.contentHero : styles.contentDefault}`}>
                 {isHero && (
                     <>
-                        <p className={styles.heroClientName}>{screen.title}</p>
-                        <h1 className={styles.heroTitle}>{screen.subtitle}</h1>
-                        <p className={styles.heroSubtitle}>{screen.body}</p>
-                        <button onClick={scrollToNext} className={styles.ctaButton}>
-                            Veja onde você vai se hospedar
-                        </button>
+                        <div className={styles.heroBlock}>
+                            <p className={styles.heroClientName}>{screen.title}</p>
+                            <h1 className={styles.heroTitle}>{screen.subtitle}</h1>
+                            <p className={styles.heroSubtitle}>{screen.body}</p>
+                        </div>
+
+                        <div className={styles.heroCtaSticky}>
+                            <button onClick={scrollToNext} className={shared.ctaButton}>
+                                Veja onde você vai se hospedar
+                            </button>
+                        </div>
                     </>
                 )}
 
-                {/* Outras telas */}
                 {!isHero && (
                     <>
-                        {/* Badge */}
                         {screen.includedStatus && !isSummary && (
                             <div style={{ marginBottom: 12 }}>
                                 <IncludedBadge status={screen.includedStatus} />
                             </div>
                         )}
 
-                        {/* Title */}
-                        <h1 className={styles.screenTitleLight}>{screen.title}</h1>
+                        <h1 className={styles.titleLight}>{screen.title}</h1>
 
-                        {/* Subtitle */}
                         {screen.subtitle && (
-                            <p className={styles.screenSubtitleLight}>{screen.subtitle}</p>
+                            <p className={styles.subtitleLight}>{screen.subtitle}</p>
                         )}
 
-                        {/* Body */}
                         {screen.body && (
-                            <p className={styles.screenBodyLight}>{screen.body}</p>
+                            <p className={styles.bodyLight}>{screen.body}</p>
                         )}
 
-                        {/* Hotel Carousel */}
                         {isHotel && screen.hotelCarouselImageUrls && (
                             <div style={{ marginTop: 20 }}>
                                 <HotelCarousel imageUrls={screen.hotelCarouselImageUrls || []} />
                             </div>
                         )}
 
-                        {/* Experiences Grid */}
                         {isExperiences && (screen as any).experienceItems && (
                             <div className={styles.experiencesGrid}>
                                 {(screen as any).experienceItems.map((exp: any, i: number) => (
@@ -101,12 +96,38 @@ export default function ScreenView({ screen, index, total, isActive }: ScreenVie
                             </div>
                         )}
 
-                        {/* Flight Card */}
                         {isFlight && (screen as any).flightData && (
-                            <FlightCard data={(screen as any).flightData} />
+                            <div className={styles.flightCard}>
+                                <div className={styles.flightHeader}>
+                                    {(screen as any).flightData.airline} · {(screen as any).flightData.flightNumber}
+                                </div>
+                                <div className={styles.flightRoute}>
+                                    <div className={styles.flightPoint}>
+                                        <div className={styles.flightTime}>{(screen as any).flightData.departureTime}</div>
+                                        <div className={styles.flightAirport}>{(screen as any).flightData.departureAirport}</div>
+                                        <div className={styles.flightCity}>{(screen as any).flightData.departureCity}</div>
+                                    </div>
+                                    <div className={styles.flightMiddle}>
+                                        <div className={styles.flightDuration}>{(screen as any).flightData.duration}</div>
+                                        <div className={styles.flightLine}>
+                                            <div className={styles.flightPlane}>✈️</div>
+                                        </div>
+                                        {(screen as any).flightData.stops > 0 && (
+                                            <div className={styles.flightStops}>
+                                                {(screen as any).flightData.stops} parada{(screen as any).flightData.stops > 1 ? "s" : ""}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className={`${styles.flightPoint} ${styles.flightPointRight}`}>
+                                        <div className={styles.flightTime}>{(screen as any).flightData.arrivalTime}</div>
+                                        <div className={styles.flightAirport}>{(screen as any).flightData.arrivalAirport}</div>
+                                        <div className={styles.flightCity}>{(screen as any).flightData.arrivalCity}</div>
+                                    </div>
+                                </div>
+                                <div className={styles.flightDate}>{(screen as any).flightData.date}</div>
+                            </div>
                         )}
 
-                        {/* Summary Price */}
                         {isSummary && (screen as any).totalPrice && (
                             <div className={styles.summaryPrice}>
                                 <div className={styles.summaryLabel}>Valor total</div>
@@ -118,9 +139,11 @@ export default function ScreenView({ screen, index, total, isActive }: ScreenVie
                 )}
             </div>
 
-            {/* Scroll hint */}
             {index < total - 1 && !isHero && (
-                <ScrollHint light={isHero} />
+                <div className={styles.scrollHint}>
+                    <span>Deslize para continuar</span>
+                    <span>↓</span>
+                </div>
             )}
         </div>
     )

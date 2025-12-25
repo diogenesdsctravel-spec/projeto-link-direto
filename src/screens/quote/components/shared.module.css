@@ -1,0 +1,27 @@
+:root {
+    --dsc-blue: #09077d;
+    --dsc-green: #50cfad;
+    --white: #ffffff;
+    --black: #000000;
+    --text-900: #111827;
+    --text-500: #6b7280;
+    --text-400: #9ca3af;
+    --overlay-dark: rgba(0, 0, 0, 0.5);
+    --overlay-darker: rgba(0, 0, 0, 0.6);
+}
+
+.ctaButton {
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: none;
+    background: var(--dsc-green);
+    color: var(--dsc-blue);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}

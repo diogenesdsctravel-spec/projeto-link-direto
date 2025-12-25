@@ -1,0 +1,296 @@
+/* ScreenView.module.css */
+
+.container {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.overlayDark {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0) 52%,
+            rgba(0, 0, 0, 0.55) 74%,
+            rgba(0, 0, 0, 0.82) 100%);
+}
+
+.overlayLight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 1) 100%);
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    overflow: visible;
+}
+
+.contentHero {
+    justify-content: flex-end;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.contentDefault {
+    justify-content: flex-start;
+    padding-top: 60px;
+}
+
+.heroBlock {
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+}
+
+.heroClientName {
+    margin: 0;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.heroTitle {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: rgb(255, 255, 255);
+    line-height: 1.12;
+}
+
+.heroSubtitle {
+    margin: 0;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.5;
+}
+
+.heroCtaSticky {
+    position: sticky;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+
+.titleLight {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    color: rgb(17, 24, 39);
+    line-height: 1.2;
+}
+
+.subtitleLight {
+    margin: 0;
+    margin-top: 8px;
+    font-size: 16px;
+    color: rgb(107, 114, 128);
+    line-height: 1.4;
+}
+
+.bodyLight {
+    margin: 0;
+    margin-top: 16px;
+    font-size: 15px;
+    color: rgb(55, 65, 81);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.pagination {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: rgb(255, 255, 255);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.paginationDark {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.paginationLight {
+    background: rgba(9, 7, 125, 0.8);
+}
+
+.scrollHint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    text-align: center;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.experiencesGrid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.experienceItem {
+    padding: 14px;
+    border-radius: 14px;
+    background: rgb(249, 250, 251);
+    border: 1px solid rgb(229, 231, 235);
+}
+
+.experienceIcon {
+    font-size: 24px;
+}
+
+.experienceTitle {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.experienceSubtitle {
+    margin-top: 4px;
+    font-size: 12px;
+    color: rgb(107, 114, 128);
+}
+
+.flightCard {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgb(255, 255, 255);
+    border: 1px solid rgb(229, 231, 235);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.flightHeader {
+    font-size: 13px;
+    color: rgb(107, 114, 128);
+    margin-bottom: 12px;
+}
+
+.flightRoute {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flightPoint {
+    text-align: left;
+}
+
+.flightPointRight {
+    text-align: right;
+}
+
+.flightTime {
+    font-size: 28px;
+    font-weight: 900;
+    color: rgb(17, 24, 39);
+}
+
+.flightAirport {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(17, 24, 39);
+}
+
+.flightCity {
+    font-size: 12px;
+    color: rgb(107, 114, 128);
+}
+
+.flightMiddle {
+    flex: 1;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.flightDuration {
+    font-size: 11px;
+    color: rgb(107, 114, 128);
+}
+
+.flightLine {
+    height: 2px;
+    background: rgb(229, 231, 235);
+    margin: 8px 0;
+    position: relative;
+}
+
+.flightPlane {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+}
+
+.flightStops {
+    font-size: 11px;
+    color: rgb(245, 158, 11);
+}
+
+.flightDate {
+    margin-top: 12px;
+    font-size: 13px;
+    color: rgb(107, 114, 128);
+    text-align: center;
+}
+
+.summaryPrice {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgb(17, 24, 39);
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+.summaryLabel {
+    font-size: 14px;
+    color: rgb(156, 163, 175);
+}
+
+.summaryValue {
+    margin-top: 8px;
+    font-size: 32px;
+    font-weight: 900;
+}
+
+.summaryNote {
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgb(156, 163, 175);
+}

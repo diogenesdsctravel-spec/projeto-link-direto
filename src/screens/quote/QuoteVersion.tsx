@@ -5,11 +5,12 @@ import { repositories } from "../../services/repositories"
 import { quoteRepository, type Quote } from "../../services/hybridQuoteRepository"
 import { generateDynamicTemplateAsync, hasExtractedData } from "../../services/dynamicTemplateGenerator"
 import { getAgencyProfile, type AgencyProfile } from "../../services/agencyService"
-import styles from "./styles/QuoteVersion.module.css"
+import styles from "./components/QuoteVersion.module.css"
 
 import BriefScreen1 from "./components/BriefScreen1"
 import BriefScreen2 from "./components/BriefScreen2"
 import BriefScreen3 from "./components/BriefScreen3"
+import HeroScreen from "./components/HeroScreen"
 import ScreenView from "./components/ScreenView"
 
 const BRIEF_SCREENS_COUNT = 3
@@ -52,7 +53,9 @@ export default function QuoteVersion() {
                     )
                     setTemplate(dynamicTemplate)
                 } else {
-                    const mockTemplate = await repositories.destinationTemplateRepository.getByDestinationKey(foundQuote.destinationKey)
+                    const mockTemplate = await repositories.destinationTemplateRepository.getByDestinationKey(
+                        foundQuote.destinationKey
+                    )
                     setTemplate(mockTemplate)
                 }
             } else {
@@ -101,6 +104,8 @@ export default function QuoteVersion() {
     }
 
     const destinationScreens = template.screens
+    const heroScreen = destinationScreens.find(s => s.type === "hero")
+    const otherScreens = destinationScreens.filter(s => s.type !== "hero")
     const totalScreens = BRIEF_SCREENS_COUNT + destinationScreens.length
 
     return (
@@ -110,14 +115,19 @@ export default function QuoteVersion() {
             <BriefScreen2 agency={agency} />
             <BriefScreen3 agency={agency} />
 
-            {/* DESTINO: N TELAS */}
-            {destinationScreens.map((screen, index) => (
+            {/* HERO: TELA DE INTRODUÇÃO DO DESTINO */}
+            {heroScreen && (
+                <HeroScreen screen={heroScreen} />
+            )}
+
+            {/* DESTINO: OUTRAS TELAS */}
+            {otherScreens.map((screen, index) => (
                 <ScreenView
                     key={screen.screenId}
                     screen={screen}
-                    index={BRIEF_SCREENS_COUNT + index}
+                    index={BRIEF_SCREENS_COUNT + 1 + index}
                     total={totalScreens}
-                    isActive={currentIndex === BRIEF_SCREENS_COUNT + index}
+                    isActive={currentIndex === BRIEF_SCREENS_COUNT + 1 + index}
                 />
             ))}
         </div>
