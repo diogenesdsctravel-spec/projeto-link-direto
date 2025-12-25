@@ -10,44 +10,47 @@ import {
 import { quoteRepository } from "../../services/hybridQuoteRepository"
 import type { ExtractedQuoteData } from "../../types/extractedQuoteData"
 
+type TemplateExperience = Experience & {
+    imageUrl?: string
+    searchTerm?: string
+}
+
 /**
  * TEMPLATE SETUP
- * 
+ *
  * Tela para cadastrar template quando destino/hotel não existe.
  * Vendedor cadastra fotos e textos, IA sugere experiências específicas do destino.
  */
 
-// Fallback genérico (só usado se IA não extraiu experiências)
-const DEFAULT_EXPERIENCES: Experience[] = [
-    { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos" },
-    { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos" },
-    { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local" },
-    { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis" },
+const DEFAULT_EXPERIENCES: TemplateExperience[] = [
+    { icon: "📸", title: "Pontos turísticos", subtitle: "Os mais famosos", imageUrl: "" },
+    { icon: "🍽️", title: "Gastronomia local", subtitle: "Sabores típicos", imageUrl: "" },
+    { icon: "🏛️", title: "Cultura e história", subtitle: "Patrimônio local", imageUrl: "" },
+    { icon: "🌅", title: "Paisagens", subtitle: "Vistas incríveis", imageUrl: "" },
 ]
 
 export default function TemplateSetup() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Dados passados pela navegação
-    const { extractedData, clientName, destinationKey } = location.state || {}
+    const { extractedData, clientName, destinationKey } = (location.state || {}) as {
+        extractedData?: ExtractedQuoteData
+        clientName?: string
+        destinationKey?: string
+    }
 
-    // Estados
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState("")
     const [step, setStep] = useState<"destination" | "hotel" | "review">("destination")
 
-    // Dados do destino
     const [heroImageUrl, setHeroImageUrl] = useState("")
     const [heroHeadline, setHeroHeadline] = useState("")
     const [heroSubtext, setHeroSubtext] = useState("")
-    const [experiences, setExperiences] = useState<Experience[]>([])
+    const [experiences, setExperiences] = useState<TemplateExperience[]>([])
 
-    // Dados do hotel
     const [hotelDescription, setHotelDescription] = useState("")
     const [hotelImageUrls, setHotelImageUrls] = useState<string[]>(["", "", ""])
 
-    // Verificar se já existe
     const [destinationExists, setDestinationExists] = useState(false)
     const [hotelExists, setHotelExists] = useState(false)
 
@@ -69,8 +72,8 @@ export default function TemplateSetup() {
                 setHeroImageUrl(dest.heroImageUrl)
                 setHeroHeadline(dest.heroHeadline || "")
                 setHeroSubtext(dest.heroSubtext || "")
-                setExperiences(dest.experiences || [])
-                setStep("hotel") // Pula para hotel se destino já existe
+                setExperiences((dest.experiences || []) as TemplateExperience[])
+                setStep("hotel")
             }
         }
 
@@ -87,31 +90,29 @@ export default function TemplateSetup() {
     function generateSuggestions() {
         const destination = extractedData?.destination || ""
 
-        // PRIORIDADE 1: Usar experiências extraídas pela IA
         if (extractedData?.suggestedExperiences && extractedData.suggestedExperiences.length > 0) {
             console.log("✅ Usando experiências da IA:", extractedData.suggestedExperiences)
-            setExperiences(extractedData.suggestedExperiences.map((exp: any) => ({
-                icon: exp.icon || "📍",
-                title: exp.title,
-                subtitle: exp.subtitle,
-                imageUrl: "",
-                searchTerm: exp.searchTerm // Guardar para ajudar vendedor a buscar fotos
-            })))
+            setExperiences(
+                extractedData.suggestedExperiences.map((exp: any) => ({
+                    icon: exp.icon || "📍",
+                    title: exp.title,
+                    subtitle: exp.subtitle,
+                    imageUrl: "",
+                    searchTerm: exp.searchTerm
+                }))
+            )
         } else {
-            // FALLBACK: Experiências genéricas (cotações antigas sem IA)
             console.log("⚠️ Usando experiências fallback (IA não extraiu)")
-            setExperiences(DEFAULT_EXPERIENCES.map(exp => ({ ...exp, imageUrl: "" })))
+            setExperiences(DEFAULT_EXPERIENCES)
         }
 
-        // Sugerir headline
         setHeroHeadline(`${clientName}, ${destination} te espera com experiências incríveis.`)
 
-        // Sugerir subtext
         const nights = extractedData?.totalNights || extractedData?.hotel?.nights || 7
         setHeroSubtext(`${nights} dias onde tudo está resolvido.\nVocê só precisa estar presente.`)
     }
 
-    function updateExperience(index: number, field: keyof Experience, value: string) {
+    function updateExperience(index: number, field: keyof TemplateExperience, value: string) {
         const updated = [...experiences]
         updated[index] = { ...updated[index], [field]: value }
         setExperiences(updated)
@@ -139,7 +140,9 @@ export default function TemplateSetup() {
                 heroImageUrl,
                 heroHeadline,
                 heroSubtext,
-                experiences: experiences.filter(e => e.title)
+                experiences: experiences
+                    .filter((e) => e.title)
+                    .map(({ searchTerm, ...rest }) => rest as Experience)
             })
 
             setStep("hotel")
@@ -151,7 +154,7 @@ export default function TemplateSetup() {
     }
 
     async function handleSaveHotel() {
-        const validUrls = hotelImageUrls.filter(url => url.trim())
+        const validUrls = hotelImageUrls.filter((url) => url.trim())
 
         if (validUrls.length === 0) {
             setError("Cole pelo menos uma URL de foto do hotel")
@@ -183,16 +186,13 @@ export default function TemplateSetup() {
         setSaving(true)
 
         try {
-            // Criar cotação
             const quote = await quoteRepository.create({
                 clientName,
                 destinationKey,
                 extractedData
             })
 
-            // Navegar para gerenciar
             navigate(`/app/cotacao/${quote.id}`)
-
         } catch (err) {
             setError("Erro ao criar cotação")
             setSaving(false)
@@ -204,101 +204,118 @@ export default function TemplateSetup() {
     }
 
     return (
-        <div style={{
-            minHeight: "100vh",
-            background: "#f9fafb",
-            fontFamily: "system-ui",
-            overflow: "auto"
-        }}>
-            {/* Header */}
-            <div style={{
-                padding: "20px 24px",
-                borderBottom: "1px solid #e5e7eb",
-                background: "#fff"
-            }}>
-                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>
-                    Configurar Template
-                </h1>
+        <div
+            style={{
+                minHeight: "100vh",
+                background: "#f9fafb",
+                fontFamily: "system-ui",
+                overflow: "auto"
+            }}
+        >
+            <div
+                style={{
+                    padding: "20px 24px",
+                    borderBottom: "1px solid #e5e7eb",
+                    background: "#fff"
+                }}
+            >
+                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Configurar Template</h1>
                 <p style={{ margin: 0, marginTop: 4, fontSize: 14, color: "#6b7280" }}>
                     {step === "destination" && "Passo 1: Cadastre as fotos e textos do destino"}
                     {step === "hotel" && "Passo 2: Cadastre as fotos do hotel"}
                     {step === "review" && "Passo 3: Revise e finalize"}
                 </p>
 
-                {/* Progress */}
-                <div style={{
-                    marginTop: 16,
-                    display: "flex",
-                    gap: 8
-                }}>
-                    <div style={{
-                        flex: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        background: "#09077d"
-                    }} />
-                    <div style={{
-                        flex: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        background: step === "hotel" || step === "review" ? "#09077d" : "#e5e7eb"
-                    }} />
-                    <div style={{
-                        flex: 1,
-                        height: 4,
-                        borderRadius: 2,
-                        background: step === "review" ? "#09077d" : "#e5e7eb"
-                    }} />
+                <div
+                    style={{
+                        marginTop: 16,
+                        display: "flex",
+                        gap: 8
+                    }}
+                >
+                    <div
+                        style={{
+                            flex: 1,
+                            height: 4,
+                            borderRadius: 2,
+                            background: "#09077d"
+                        }}
+                    />
+                    <div
+                        style={{
+                            flex: 1,
+                            height: 4,
+                            borderRadius: 2,
+                            background: step === "hotel" || step === "review" ? "#09077d" : "#e5e7eb"
+                        }}
+                    />
+                    <div
+                        style={{
+                            flex: 1,
+                            height: 4,
+                            borderRadius: 2,
+                            background: step === "review" ? "#09077d" : "#e5e7eb"
+                        }}
+                    />
                 </div>
             </div>
 
-            {/* Conteúdo */}
             <div style={{ padding: 24, maxWidth: 600, margin: "0 auto" }}>
-
-                {/* INFO: Dados extraídos */}
-                <div style={{
-                    padding: 16,
-                    background: "#ecfdf5",
-                    borderRadius: 12,
-                    marginBottom: 20,
-                    border: "1px solid #a7f3d0"
-                }}>
+                <div
+                    style={{
+                        padding: 16,
+                        background: "#ecfdf5",
+                        borderRadius: 12,
+                        marginBottom: 20,
+                        border: "1px solid #a7f3d0"
+                    }}
+                >
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#065f46" }}>
                         📋 Cotação para: {clientName}
                     </div>
                     <div style={{ fontSize: 13, color: "#065f46", marginTop: 4 }}>
-                        📍 {extractedData?.destination} · 🏨 {extractedData?.hotel?.name} · 💰 {extractedData?.totalPrice}
+                        📍 {extractedData?.destination} · 🏨 {extractedData?.hotel?.name} · 💰{" "}
+                        {extractedData?.totalPrice}
                     </div>
                 </div>
 
-                {/* STEP 1: DESTINO */}
                 {step === "destination" && (
-                    <div style={{
-                        background: "#fff",
-                        borderRadius: 16,
-                        padding: 24,
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-                    }}>
+                    <div
+                        style={{
+                            background: "#fff",
+                            borderRadius: 16,
+                            padding: 24,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                        }}
+                    >
                         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
                             📍 {extractedData?.destination}
                         </h2>
 
                         {destinationExists && (
-                            <div style={{
-                                marginTop: 12,
-                                padding: 12,
-                                background: "#fef3c7",
-                                borderRadius: 8,
-                                fontSize: 13,
-                                color: "#92400e"
-                            }}>
+                            <div
+                                style={{
+                                    marginTop: 12,
+                                    padding: 12,
+                                    background: "#fef3c7",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    color: "#92400e"
+                                }}
+                            >
                                 ✅ Destino já cadastrado! Você pode editar ou pular.
                             </div>
                         )}
 
-                        {/* Hero Image */}
                         <div style={{ marginTop: 20 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 6
+                                }}
+                            >
                                 Foto principal do destino *
                             </label>
                             <input
@@ -331,9 +348,15 @@ export default function TemplateSetup() {
                             )}
                         </div>
 
-                        {/* Headline */}
                         <div style={{ marginTop: 16 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 6
+                                }}
+                            >
                                 Texto principal (headline)
                             </label>
                             <textarea
@@ -352,9 +375,15 @@ export default function TemplateSetup() {
                             />
                         </div>
 
-                        {/* Subtext */}
                         <div style={{ marginTop: 16 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 6
+                                }}
+                            >
                                 Texto secundário
                             </label>
                             <textarea
@@ -375,7 +404,14 @@ export default function TemplateSetup() {
 
                         {/* Experiências */}
                         <div style={{ marginTop: 20 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 10 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 10
+                                }}
+                            >
                                 Experiências do destino (URLs das fotos)
                             </label>
                             <p style={{ margin: 0, marginBottom: 12, fontSize: 12, color: "#6b7280" }}>
@@ -383,57 +419,160 @@ export default function TemplateSetup() {
                             </p>
 
                             {experiences.map((exp, idx) => (
-                                <div key={idx} style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 8,
-                                    marginBottom: 12,
-                                    padding: 10,
-                                    background: "#f9fafb",
-                                    borderRadius: 8
-                                }}>
-                                    <span style={{ fontSize: 24 }}>{exp.icon}</span>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: 14, fontWeight: 600 }}>{exp.title}</div>
-                                        <div style={{ fontSize: 12, color: "#6b7280" }}>{exp.subtitle}</div>
-                                        {(exp as any).searchTerm && (
-                                            <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>
-                                                🔍 Buscar: "{(exp as any).searchTerm}"
-                                            </div>
-                                        )}
+                                <div
+                                    key={idx}
+                                    style={{
+                                        marginBottom: 12,
+                                        padding: 12,
+                                        background: "#f9fafb",
+                                        borderRadius: 8,
+                                        border: "1px solid #e5e7eb"
+                                    }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                        <input
+                                            type="text"
+                                            value={exp.icon}
+                                            onChange={(e) => updateExperience(idx, "icon", e.target.value)}
+                                            style={{
+                                                width: 40,
+                                                padding: "6px",
+                                                borderRadius: 6,
+                                                border: "1px solid #d1d5db",
+                                                fontSize: 18,
+                                                textAlign: "center"
+                                            }}
+                                        />
+                                        <input
+                                            type="text"
+                                            value={exp.title}
+                                            onChange={(e) => updateExperience(idx, "title", e.target.value)}
+                                            placeholder="Nome da experiência"
+                                            style={{
+                                                flex: 1,
+                                                padding: "8px 10px",
+                                                borderRadius: 6,
+                                                border: "1px solid #d1d5db",
+                                                fontSize: 14,
+                                                fontWeight: 600
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                const updated = experiences.filter((_, i) => i !== idx)
+                                                setExperiences(updated)
+                                            }}
+                                            style={{
+                                                padding: "6px 10px",
+                                                borderRadius: 6,
+                                                border: "1px solid #fca5a5",
+                                                background: "#fef2f2",
+                                                color: "#dc2626",
+                                                fontSize: 12,
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            ✕
+                                        </button>
                                     </div>
+
                                     <input
                                         type="text"
-                                        value={exp.imageUrl || ""}
-                                        onChange={(e) => updateExperience(idx, "imageUrl", e.target.value)}
-                                        placeholder="URL da foto"
+                                        value={exp.subtitle}
+                                        onChange={(e) => updateExperience(idx, "subtitle", e.target.value)}
+                                        placeholder="Breve descrição"
                                         style={{
-                                            width: 180,
+                                            width: "100%",
                                             padding: "8px 10px",
                                             borderRadius: 6,
                                             border: "1px solid #d1d5db",
-                                            fontSize: 12
+                                            fontSize: 13,
+                                            marginBottom: 8,
+                                            boxSizing: "border-box"
                                         }}
                                     />
+
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <input
+                                            type="text"
+                                            value={exp.imageUrl || ""}
+                                            onChange={(e) => updateExperience(idx, "imageUrl", e.target.value)}
+                                            placeholder="URL da foto"
+                                            style={{
+                                                flex: 1,
+                                                padding: "8px 10px",
+                                                borderRadius: 6,
+                                                border: "1px solid #d1d5db",
+                                                fontSize: 12
+                                            }}
+                                        />
+                                        {exp.imageUrl && (
+                                            <img
+                                                src={exp.imageUrl}
+                                                alt="Preview"
+                                                style={{
+                                                    width: 50,
+                                                    height: 50,
+                                                    objectFit: "cover",
+                                                    borderRadius: 6
+                                                }}
+                                                onError={(e) => (e.currentTarget.style.display = "none")}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {exp.searchTerm && (
+                                        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 6 }}>
+                                            🔍 Buscar: "{exp.searchTerm}"
+                                        </div>
+                                    )}
                                 </div>
                             ))}
+
+                            <button
+                                onClick={() => {
+                                    setExperiences([
+                                        ...experiences,
+                                        {
+                                            icon: "📍",
+                                            title: "",
+                                            subtitle: "",
+                                            imageUrl: ""
+                                        }
+                                    ])
+                                }}
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    borderRadius: 8,
+                                    border: "2px dashed #d1d5db",
+                                    background: "#fff",
+                                    color: "#6b7280",
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    marginTop: 8
+                                }}
+                            >
+                                + Adicionar experiência
+                            </button>
                         </div>
 
-                        {/* Erro */}
                         {error && (
-                            <div style={{
-                                marginTop: 16,
-                                padding: 12,
-                                background: "#fee2e2",
-                                borderRadius: 8,
-                                fontSize: 13,
-                                color: "#dc2626"
-                            }}>
+                            <div
+                                style={{
+                                    marginTop: 16,
+                                    padding: 12,
+                                    background: "#fee2e2",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    color: "#dc2626"
+                                }}
+                            >
                                 {error}
                             </div>
                         )}
 
-                        {/* Botões */}
                         <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
                             {destinationExists && (
                                 <button
@@ -472,37 +611,47 @@ export default function TemplateSetup() {
                     </div>
                 )}
 
-                {/* STEP 2: HOTEL */}
                 {step === "hotel" && (
-                    <div style={{
-                        background: "#fff",
-                        borderRadius: 16,
-                        padding: 24,
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-                    }}>
+                    <div
+                        style={{
+                            background: "#fff",
+                            borderRadius: 16,
+                            padding: 24,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                        }}
+                    >
                         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
                             🏨 {extractedData?.hotel?.name}
                         </h2>
                         <p style={{ margin: 0, marginTop: 4, fontSize: 13, color: "#6b7280" }}>
-                            {extractedData?.hotel?.stars && "★".repeat(extractedData.hotel.stars)} · {extractedData?.hotel?.address}
+                            {extractedData?.hotel?.stars && "★".repeat(extractedData.hotel.stars)} ·{" "}
+                            {extractedData?.hotel?.address}
                         </p>
 
                         {hotelExists && (
-                            <div style={{
-                                marginTop: 12,
-                                padding: 12,
-                                background: "#fef3c7",
-                                borderRadius: 8,
-                                fontSize: 13,
-                                color: "#92400e"
-                            }}>
+                            <div
+                                style={{
+                                    marginTop: 12,
+                                    padding: 12,
+                                    background: "#fef3c7",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    color: "#92400e"
+                                }}
+                            >
                                 ✅ Hotel já cadastrado! Você pode editar ou pular.
                             </div>
                         )}
 
-                        {/* Descrição */}
                         <div style={{ marginTop: 20 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 6
+                                }}
+                            >
                                 Descrição do hotel (cole do Booking/TripAdvisor)
                             </label>
                             <textarea
@@ -522,9 +671,15 @@ export default function TemplateSetup() {
                             />
                         </div>
 
-                        {/* Fotos do hotel */}
                         <div style={{ marginTop: 16 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 10 }}>
+                            <label
+                                style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "block",
+                                    marginBottom: 10
+                                }}
+                            >
                                 Fotos do hotel (URLs) *
                             </label>
 
@@ -562,21 +717,21 @@ export default function TemplateSetup() {
                             ))}
                         </div>
 
-                        {/* Erro */}
                         {error && (
-                            <div style={{
-                                marginTop: 16,
-                                padding: 12,
-                                background: "#fee2e2",
-                                borderRadius: 8,
-                                fontSize: 13,
-                                color: "#dc2626"
-                            }}>
+                            <div
+                                style={{
+                                    marginTop: 16,
+                                    padding: 12,
+                                    background: "#fee2e2",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    color: "#dc2626"
+                                }}
+                            >
                                 {error}
                             </div>
                         )}
 
-                        {/* Botões */}
                         <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
                             <button
                                 onClick={() => setStep("destination")}
@@ -629,32 +784,42 @@ export default function TemplateSetup() {
                     </div>
                 )}
 
-                {/* STEP 3: REVIEW */}
                 {step === "review" && (
-                    <div style={{
-                        background: "#fff",
-                        borderRadius: 16,
-                        padding: 24,
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-                    }}>
-                        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                            ✅ Template configurado!
-                        </h2>
+                    <div
+                        style={{
+                            background: "#fff",
+                            borderRadius: 16,
+                            padding: 24,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                        }}
+                    >
+                        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>✅ Template configurado!</h2>
                         <p style={{ margin: 0, marginTop: 8, fontSize: 14, color: "#6b7280" }}>
                             Agora você pode criar a cotação para {clientName}.
                         </p>
 
-                        <div style={{
-                            marginTop: 20,
-                            padding: 16,
-                            background: "#f9fafb",
-                            borderRadius: 12
-                        }}>
+                        <div
+                            style={{
+                                marginTop: 20,
+                                padding: 16,
+                                background: "#f9fafb",
+                                borderRadius: 12
+                            }}
+                        >
                             <div style={{ fontSize: 14, lineHeight: 1.8 }}>
-                                <div>📍 <strong>Destino:</strong> {extractedData?.destination}</div>
-                                <div>🏨 <strong>Hotel:</strong> {extractedData?.hotel?.name}</div>
-                                <div>📅 <strong>Período:</strong> {extractedData?.travelDate} - {extractedData?.returnDate}</div>
-                                <div>👥 <strong>Passageiros:</strong> {extractedData?.passengers}</div>
+                                <div>
+                                    📍 <strong>Destino:</strong> {extractedData?.destination}
+                                </div>
+                                <div>
+                                    🏨 <strong>Hotel:</strong> {extractedData?.hotel?.name}
+                                </div>
+                                <div>
+                                    📅 <strong>Período:</strong> {extractedData?.travelDate} -{" "}
+                                    {extractedData?.returnDate}
+                                </div>
+                                <div>
+                                    👥 <strong>Passageiros:</strong> {extractedData?.passengers}
+                                </div>
                                 <div style={{ marginTop: 8 }}>
                                     💰 <strong>Total:</strong>{" "}
                                     <span style={{ color: "#059669", fontWeight: 700, fontSize: 18 }}>
@@ -664,21 +829,21 @@ export default function TemplateSetup() {
                             </div>
                         </div>
 
-                        {/* Erro */}
                         {error && (
-                            <div style={{
-                                marginTop: 16,
-                                padding: 12,
-                                background: "#fee2e2",
-                                borderRadius: 8,
-                                fontSize: 13,
-                                color: "#dc2626"
-                            }}>
+                            <div
+                                style={{
+                                    marginTop: 16,
+                                    padding: 12,
+                                    background: "#fee2e2",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    color: "#dc2626"
+                                }}
+                            >
                                 {error}
                             </div>
                         )}
 
-                        {/* Botão final */}
                         <button
                             onClick={handleFinish}
                             disabled={saving}

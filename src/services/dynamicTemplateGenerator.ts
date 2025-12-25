@@ -398,10 +398,12 @@ export async function generateDynamicTemplateAsync(
 
     // Experiências para a lista
     const experiences: ExperienceTemplate[] = (destinationData?.experiences || getDefaultExperiences(destination)).map(
-        exp => ({
+        (exp, index) => ({
+            experienceId: `exp-${index}`,
             icon: exp.icon,
             title: exp.title,
-            subtitle: exp.subtitle
+            subtitle: exp.subtitle,
+            imageUrl: exp.imageUrl || ""
         })
     )
 
@@ -433,10 +435,12 @@ export function generateDynamicTemplate(
         generateSummaryScreen(extractedData, clientName)
     ]
 
-    const experiences: ExperienceTemplate[] = getDefaultExperiences(destination).map(exp => ({
+    const experiences: ExperienceTemplate[] = getDefaultExperiences(destination).map((exp, index) => ({
+        experienceId: `exp-${index}`,
         icon: exp.icon,
         title: exp.title,
-        subtitle: exp.subtitle
+        subtitle: exp.subtitle,
+        imageUrl: ""
     }))
 
     return {
