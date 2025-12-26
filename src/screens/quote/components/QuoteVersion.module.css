@@ -9,7 +9,8 @@
 
 /* Cada tela ocupa a altura da viewport com scroll snap */
 .screenSnap {
-    height: 100vh;
+    height: calc(100vh - 200px);
+    min-height: 500px;
     scroll-snap-align: start;
     scroll-snap-stop: always;
     position: relative;

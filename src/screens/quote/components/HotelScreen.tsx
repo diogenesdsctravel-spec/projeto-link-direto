@@ -6,9 +6,10 @@ interface HotelScreenProps {
     screen: ScreenTemplate
     destination: string
     nights: number
+    onNext?: () => void
 }
 
-export default function HotelScreen({ screen, destination, nights }: HotelScreenProps) {
+export default function HotelScreen({ screen, destination, nights, onNext }: HotelScreenProps) {
     const images = screen.hotelCarouselImageUrls || [screen.imageUrl || ""]
     const [currentSlide, setCurrentSlide] = useState(0)
     const touchStartX = useRef(0)
@@ -24,14 +25,9 @@ export default function HotelScreen({ screen, destination, nights }: HotelScreen
 
     const hotelName = (screen.title || "").replace(/\s*★+\s*$/, "").trim()
 
-    function scrollToNext() {
-        const container = document.getElementById("quote-container")
-        if (container) {
-            const currentScroll = container.scrollTop
-            container.scrollTo({
-                top: currentScroll + window.innerHeight,
-                behavior: "smooth"
-            })
+    function handleNext() {
+        if (onNext) {
+            onNext()
         }
     }
 
@@ -123,7 +119,7 @@ export default function HotelScreen({ screen, destination, nights }: HotelScreen
                     </div>
                 )}
 
-                <button className={styles.button} onClick={scrollToNext}>
+                <button className={styles.button} onClick={handleNext}>
                     Ver detalhes da sua estadia
                 </button>
             </div>

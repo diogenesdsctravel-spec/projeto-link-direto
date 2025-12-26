@@ -4,155 +4,146 @@
  * Exibe resumo do voo de volta com dados dinâmicos
  */
 
-import { Plane, MapPin, Calendar, Briefcase, Backpack } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import type { FlightLeg, BaggageInfo } from '../../../types/extractedQuoteData';
+import { Plane, MapPin, Calendar, Briefcase, Backpack } from 'lucide-react'
+import styles from './ReturnFlightOverview.module.css'
+import type { FlightLeg, BaggageInfo } from '../../../types/extractedQuoteData'
 
 interface ReturnFlightOverviewProps {
-    destination: string;
-    origin: string;
-    flight: FlightLeg;
-    baggage: BaggageInfo;
-    returnDate: string;
-    onViewDetails: () => void;
-    onBack: () => void;
+    destination: string
+    origin: string
+    flight: FlightLeg
+    baggage: BaggageInfo
+    returnDate: string
+    backgroundImage?: string
+    onViewDetails: () => void
 }
 
-export function ReturnFlightOverview({
+export default function ReturnFlightOverview({
     destination,
     origin,
     flight,
     baggage,
     returnDate,
-    onViewDetails,
-    onBack
+    backgroundImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    onViewDetails
 }: ReturnFlightOverviewProps) {
     // Pegar primeiro e último segmento
-    const firstSegment = flight.segments[0];
-    const lastSegment = flight.segments[flight.segments.length - 1];
+    const firstSegment = flight.segments[0]
+    const lastSegment = flight.segments[flight.segments.length - 1]
 
     if (!firstSegment) {
-        return (
-            <div className="relative min-h-screen flex items-center justify-center">
-                <p className="text-gray-500">Dados do voo não disponíveis</p>
-            </div>
-        );
+        return null
     }
 
     // Formatar data curta (ex: "23 fev")
     const formatShortDate = (dateStr: string) => {
-        const match = dateStr.match(/(\d{1,2})\s*\.?\s*(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i);
+        const match = dateStr.match(/(\d{1,2})\s*(?:de\s*)?(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i)
         if (match) {
-            return `${match[1]} ${match[2]}`;
+            return `${match[1]} ${match[2].toLowerCase()}`
         }
-        return dateStr;
-    };
+        return dateStr
+    }
 
     return (
-        <div className="relative min-h-screen">
+        <div className={styles.container}>
             {/* Background Image */}
-            <div className="absolute inset-0 w-full h-full">
-                <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
-                    alt="Sunset beach"
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#09077D]"></div>
-            </div>
+            <div
+                className={styles.background}
+                style={{ backgroundImage: `url(${backgroundImage})` }}
+            />
 
-            {/* Content Overlay */}
-            <div className="relative z-10 min-h-screen flex flex-col justify-end pt-20 pb-24">
-                {/* Bottom Content */}
-                <div className="px-4">
-                    {/* Badges */}
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                            <MapPin className="w-4 h-4 text-[#50cfad]" />
-                            <span className="text-white text-sm">Voo de retorno</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                            <Calendar className="w-4 h-4 text-[#50cfad]" />
-                            <span className="text-white text-sm">{formatShortDate(returnDate)}</span>
-                        </div>
+            {/* Overlay */}
+            <div className={styles.overlay} />
+
+            {/* Content */}
+            <div className={styles.content}>
+                <div className={styles.spacer} />
+
+                {/* Badges */}
+                <div className={styles.badges}>
+                    <div className={styles.badge}>
+                        <MapPin className={styles.badgeIcon} />
+                        <span className={styles.badgeText}>Voo de retorno</span>
                     </div>
-
-                    {/* Title */}
-                    <h1 className="text-4xl text-white mb-3 leading-tight">
-                        Hora de voltar para casa
-                    </h1>
-
-                    {/* Description */}
-                    <p className="text-white/90 text-lg mb-6">
-                        Leve todas as lembranças de {destination} no coração. Partida às {firstSegment.departureTime}, chegada em {origin} às {lastSegment.arrivalTime}
-                    </p>
-
-                    {/* Flight Card - Compact */}
-                    <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 mb-4">
-                        <div className="flex items-center justify-between mb-5">
-                            {/* Departure */}
-                            <div>
-                                <p className="text-4xl text-[#09077D] mb-1">{firstSegment.departureTime}</p>
-                                <p className="text-[#50cfad] font-medium">{firstSegment.departureAirport}</p>
-                                <p className="text-sm text-gray-600">{firstSegment.departureCity}</p>
-                            </div>
-
-                            {/* Duration */}
-                            <div className="flex-1 flex flex-col items-center mx-3">
-                                <p className="text-sm text-gray-500 mb-2">{flight.totalDuration}</p>
-                                <div className="w-full flex items-center">
-                                    <div className="flex-1 h-px bg-gray-300"></div>
-                                    <Plane className="w-5 h-5 text-[#50cfad] mx-2 -rotate-90" />
-                                    <div className="flex-1 h-px bg-gray-300"></div>
-                                </div>
-                                <p className="text-sm text-gray-500 mt-2">{firstSegment.airline}</p>
-                            </div>
-
-                            {/* Arrival */}
-                            <div className="text-right">
-                                <p className="text-4xl text-[#09077D] mb-1">{lastSegment.arrivalTime}</p>
-                                <p className="text-[#50cfad] font-medium">{lastSegment.arrivalAirport}</p>
-                                <p className="text-sm text-gray-600">{lastSegment.arrivalCity}</p>
-                            </div>
-                        </div>
-
-                        {/* Baggage Icons */}
-                        <div className="flex items-center justify-center gap-4 pt-3 border-t border-gray-200">
-                            {/* Item pessoal */}
-                            <div className="flex items-center gap-1.5">
-                                <Backpack className={`w-4 h-4 ${baggage.personalItem.included ? 'text-[#50cfad]' : 'text-gray-300'}`} />
-                                <span className={`text-xs ${baggage.personalItem.included ? 'text-gray-600' : 'text-gray-400'}`}>
-                                    1 item
-                                </span>
-                            </div>
-
-                            {/* Mala de mão */}
-                            <div className="flex items-center gap-1.5">
-                                <Briefcase className={`w-5 h-5 ${baggage.carryOn.included ? 'text-[#50cfad]' : 'text-gray-300'}`} />
-                                <span className={`text-xs ${baggage.carryOn.included ? 'text-gray-600' : 'text-gray-400'}`}>
-                                    {baggage.carryOn.weight || '10kg'}
-                                </span>
-                            </div>
-
-                            {/* Mala despachada */}
-                            <div className="flex items-center gap-1.5">
-                                <Briefcase className={`w-6 h-6 ${baggage.checked.included ? 'text-[#50cfad]' : 'text-gray-300'}`} />
-                                <span className={`text-xs ${baggage.checked.included ? 'text-gray-600' : 'text-gray-400'}`}>
-                                    {baggage.checked.weight || '23kg'}
-                                </span>
-                            </div>
-                        </div>
+                    <div className={styles.badge}>
+                        <Calendar className={styles.badgeIcon} />
+                        <span className={styles.badgeText}>{formatShortDate(returnDate)}</span>
                     </div>
-
-                    {/* CTA Button */}
-                    <button
-                        onClick={onViewDetails}
-                        className="w-full bg-[#50cfad] text-[#09077D] py-4 rounded-2xl text-lg flex items-center justify-center gap-2 shadow-lg font-medium"
-                    >
-                        Ver detalhes do voo
-                        <span className="text-xl">→</span>
-                    </button>
                 </div>
+
+                {/* Title */}
+                <h1 className={styles.title}>
+                    Hora de voltar para casa
+                </h1>
+
+                {/* Subtitle */}
+                <p className={styles.subtitle}>
+                    Leve todas as lembranças de {destination} no coração. Partida às {firstSegment.departureTime}, chegada em {origin} às {lastSegment.arrivalTime}
+                </p>
+
+                {/* Flight Card */}
+                <div className={styles.flightCard}>
+                    <div className={styles.flightRoute}>
+                        {/* Departure */}
+                        <div className={styles.flightPoint}>
+                            <div className={styles.flightTime}>{firstSegment.departureTime}</div>
+                            <div className={styles.flightCode}>{firstSegment.departureAirport}</div>
+                            <div className={styles.flightCity}>{firstSegment.departureCity}</div>
+                        </div>
+
+                        {/* Duration */}
+                        <div className={styles.flightMiddle}>
+                            <span className={styles.flightDuration}>{flight.totalDuration}</span>
+                            <div className={styles.flightLine}>
+                                <div className={styles.flightLineBorder} />
+                                <Plane className={styles.flightPlaneIcon} />
+                                <div className={styles.flightLineBorder} />
+                            </div>
+                            <span className={styles.flightAirline}>{firstSegment.airline}</span>
+                        </div>
+
+                        {/* Arrival */}
+                        <div className={`${styles.flightPoint} ${styles.flightPointRight}`}>
+                            <div className={styles.flightTime}>{lastSegment.arrivalTime}</div>
+                            <div className={styles.flightCode}>{lastSegment.arrivalAirport}</div>
+                            <div className={styles.flightCity}>{lastSegment.arrivalCity}</div>
+                        </div>
+                    </div>
+
+                    {/* Baggage */}
+                    <div className={styles.baggageSection}>
+                        {/* Item pessoal */}
+                        <div className={styles.baggageItem}>
+                            <Backpack className={`${styles.baggageIconSmall} ${baggage.personalItem.included ? styles.baggageIconIncluded : styles.baggageIconNotIncluded}`} />
+                            <span className={baggage.personalItem.included ? styles.baggageText : styles.baggageTextDisabled}>
+                                1 item
+                            </span>
+                        </div>
+
+                        {/* Mala de mão */}
+                        <div className={styles.baggageItem}>
+                            <Briefcase className={`${styles.baggageIconMedium} ${baggage.carryOn.included ? styles.baggageIconIncluded : styles.baggageIconNotIncluded}`} />
+                            <span className={baggage.carryOn.included ? styles.baggageText : styles.baggageTextDisabled}>
+                                {baggage.carryOn.weight || '10kg'}
+                            </span>
+                        </div>
+
+                        {/* Mala despachada */}
+                        <div className={styles.baggageItem}>
+                            <Briefcase className={`${styles.baggageIconLarge} ${baggage.checked.included ? styles.baggageIconIncluded : styles.baggageIconNotIncluded}`} />
+                            <span className={baggage.checked.included ? styles.baggageText : styles.baggageTextDisabled}>
+                                {baggage.checked.weight || '23kg'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* CTA Button */}
+                <button onClick={onViewDetails} className={styles.button}>
+                    <span>Ver detalhes do voo</span>
+                    <span className={styles.buttonArrow}>→</span>
+                </button>
             </div>
         </div>
-    );
+    )
 }

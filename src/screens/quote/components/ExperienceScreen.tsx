@@ -5,23 +5,19 @@ import type { ExperienceTemplate } from "../../../types/destinationTemplate"
 interface ExperienceScreenProps {
     experiences: ExperienceTemplate[]
     destination: string
+    onNext?: () => void
 }
 
-export default function ExperienceScreen({ experiences, destination }: ExperienceScreenProps) {
+export default function ExperienceScreen({ experiences, destination, onNext }: ExperienceScreenProps) {
     const [currentSlide, setCurrentSlide] = useState(0)
     const touchStartX = useRef(0)
     const touchStartY = useRef(0)
 
     const currentExperience = experiences[currentSlide]
 
-    function scrollToNext() {
-        const container = document.getElementById("quote-container")
-        if (container) {
-            const currentScroll = container.scrollTop
-            container.scrollTo({
-                top: currentScroll + window.innerHeight,
-                behavior: "smooth"
-            })
+    function handleNext() {
+        if (onNext) {
+            onNext()
         }
     }
 
@@ -99,7 +95,7 @@ export default function ExperienceScreen({ experiences, destination }: Experienc
                         <p className={styles.experienceSubtitle}>{currentExperience.subtitle}</p>
                     )}
 
-                    {/* ✅ NOVO: Exibir description */}
+                    {/* ✅ Exibir description */}
                     {currentExperience.description && (
                         <p className={styles.experienceDescription}>{currentExperience.description}</p>
                     )}
@@ -119,7 +115,7 @@ export default function ExperienceScreen({ experiences, destination }: Experienc
                     </div>
                 )}
 
-                <button className={styles.button} onClick={scrollToNext}>
+                <button className={styles.button} onClick={handleNext}>
                     Continuar
                 </button>
             </div>

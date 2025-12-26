@@ -4,17 +4,13 @@ import type { ScreenTemplate } from "../../../types/destinationTemplate"
 
 interface HeroScreenProps {
     screen: ScreenTemplate
+    onNext?: () => void
 }
 
-export default function HeroScreen({ screen }: HeroScreenProps) {
-    function scrollToNext() {
-        const container = document.getElementById("quote-container")
-        if (container) {
-            const currentScroll = container.scrollTop
-            container.scrollTo({
-                top: currentScroll + window.innerHeight,
-                behavior: "smooth"
-            })
+export default function HeroScreen({ screen, onNext }: HeroScreenProps) {
+    function handleNext() {
+        if (onNext) {
+            onNext()
         }
     }
 
@@ -33,7 +29,7 @@ export default function HeroScreen({ screen }: HeroScreenProps) {
                     <p className={styles.clientName}>{screen.title}</p>
                     <h1 className={styles.title}>{screen.subtitle}</h1>
                     <p className={styles.subtitle}>{screen.body}</p>
-                    <button className={styles.button} onClick={scrollToNext}>
+                    <button className={styles.button} onClick={handleNext}>
                         Veja onde você vai se hospedar
                     </button>
                 </div>
