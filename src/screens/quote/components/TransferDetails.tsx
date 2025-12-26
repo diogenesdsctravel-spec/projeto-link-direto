@@ -17,6 +17,7 @@ interface TransferDetailsProps {
     type: 'outbound' | 'return'
     transfer: TransferInfo
     onBack: () => void
+    onNext: () => void
 }
 
 // Imagens padrão para transfers
@@ -43,6 +44,7 @@ export default function TransferDetails({
     type,
     transfer,
     onBack,
+    onNext,
 }: TransferDetailsProps) {
     const title = type === 'outbound' ? 'Transfer - Ida' : 'Transfer - Volta'
     const imageUrl = TRANSFER_IMAGES[type]
@@ -174,6 +176,11 @@ export default function TransferDetails({
                             ))}
                         </ul>
                     </div>
+
+                    {/* Botão Continuar */}
+                    <button onClick={onNext} className={styles.button}>
+                        Continuar
+                    </button>
                 </div>
             </div>
         </div>

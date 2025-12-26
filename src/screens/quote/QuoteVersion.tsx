@@ -155,16 +155,20 @@ export default function QuoteVersion() {
 
     const returnBaggage = extractedData?.returnBaggage || outboundBaggage
 
+    // Aeroporto de chegada (do voo de ida) e partida (do voo de volta)
+    const arrivalAirport = outboundFlight?.segments?.[outboundFlight.segments.length - 1]?.arrivalCity || destination
+    const departureAirport = returnFlight?.segments?.[0]?.departureCity || destination
+
     const transferOutbound = extractedData?.transfers?.outbound || {
         included: false,
-        from: `Aeroporto de ${destination}`,
-        to: "Hotel"
+        from: `Aeroporto de ${arrivalAirport}`,
+        to: `Hotel em ${destination}`
     }
 
     const transferReturn = extractedData?.transfers?.return || {
         included: false,
-        from: "Hotel",
-        to: `Aeroporto de ${destination}`
+        from: `Hotel em ${destination}`,
+        to: `Aeroporto de ${departureAirport}`
     }
 
     // ========================================
@@ -262,46 +266,54 @@ export default function QuoteVersion() {
 
     // TRANSFER IDA - CARD
     if (currentScreen === "transfer-outbound") {
+        // Se transfer incluído, botão vai para detalhes. Se não, vai para próximo
+        const nextScreen = transferOutbound.included ? "transfer-outbound-details" : "transfer-return"
         return (
             <TransferCard
                 type="outbound"
                 transfer={transferOutbound}
                 destination={destination}
-                onViewDetails={() => goTo("transfer-return")}
+                arrivalCity={arrivalAirport}
+                onViewDetails={() => goTo(nextScreen)}
             />
         )
     }
 
-    // TRANSFER IDA - DETALHES
+    // TRANSFER IDA - DETALHES (só se incluído)
     if (currentScreen === "transfer-outbound-details") {
         return (
             <TransferDetails
                 type="outbound"
                 transfer={transferOutbound}
                 onBack={() => goTo("transfer-outbound")}
+                onNext={() => goTo("transfer-return")}
             />
         )
     }
 
     // TRANSFER VOLTA - CARD
     if (currentScreen === "transfer-return") {
+        // Se transfer incluído, botão vai para detalhes. Se não, vai para voo de volta
+        const nextScreen = transferReturn.included ? "transfer-return-details" : "flight-return-overview"
         return (
             <TransferCard
                 type="return"
                 transfer={transferReturn}
                 destination={destination}
-                onViewDetails={() => goTo("flight-return-overview")}
+                arrivalCity={departureAirport}
+                onViewDetails={() => goTo(nextScreen)}
             />
         )
     }
 
-    // TRANSFER VOLTA - DETALHES
+    // TRANSFER VOLTA - DETALHES (só se incluído)
     if (currentScreen === "transfer-return-details") {
         return (
             <TransferDetails
                 type="return"
                 transfer={transferReturn}
                 onBack={() => goTo("transfer-return")}
+                onNext={() => goTo("flight-return-overview")}
             />
         )
     }
