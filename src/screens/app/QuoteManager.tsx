@@ -7,6 +7,8 @@ import { isSupabaseConfigured } from "../../services/supabaseClient"
  * QUOTE MANAGER - COM LINK OPEN GRAPH
  * 
  * Gera link no formato /p/{publicId} para preview no WhatsApp
+ * 
+ * ✅ CORRIGIDO: Usa publicId existente em vez de sempre gerar novo
  */
 
 // URL base do Netlify para produção
@@ -109,10 +111,10 @@ export default function QuoteManager() {
             }]
         }
 
-        // Gerar publicId
-        const publicId = `q-${Date.now()}`
+        // ✅ CORRIGIDO: Usar publicId existente OU gerar novo se não existir
+        const publicId = quote.publicId || `q-${Date.now()}`
 
-        console.log("💾 Atualizando cotação com publicId:", publicId)
+        console.log("💾 Usando publicId:", publicId, quote.publicId ? "(existente)" : "(novo)")
 
         const updated = await quoteRepository.update(quote.id, {
             publicId,
@@ -274,25 +276,6 @@ export default function QuoteManager() {
                             }}
                         >
                             {copySuccess ? "✓ Copiado!" : "📋 Copiar Link"}
-                        </button>
-
-                        <button
-                            onClick={generateLink}
-                            disabled={saving}
-                            style={{
-                                marginTop: 8,
-                                padding: "10px 14px",
-                                borderRadius: 10,
-                                border: "1px solid rgba(255,255,255,0.3)",
-                                background: "transparent",
-                                color: "#9ca3af",
-                                fontWeight: 600,
-                                cursor: saving ? "not-allowed" : "pointer",
-                                width: "100%",
-                                fontSize: 12,
-                            }}
-                        >
-                            {saving ? "Gerando..." : "🔄 Gerar novo link"}
                         </button>
                     </>
                 ) : (
