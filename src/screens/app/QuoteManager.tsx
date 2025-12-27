@@ -4,8 +4,13 @@ import { quoteRepository, type Quote, type QuoteVersion } from "../../services/h
 import { isSupabaseConfigured } from "../../services/supabaseClient"
 
 /**
- * QUOTE MANAGER - COM SUPABASE
+ * QUOTE MANAGER - COM LINK OPEN GRAPH
+ * 
+ * Gera link no formato /p/{publicId} para preview no WhatsApp
  */
+
+// URL base do Netlify para produção
+const PRODUCTION_URL = "https://dsc-travel.netlify.app"
 
 export default function QuoteManager() {
     const { id } = useParams<{ id: string }>()
@@ -118,9 +123,8 @@ export default function QuoteManager() {
             console.log("✅ Cotação atualizada:", updated)
             setQuote(updated)
 
-            // Copiar URL
-            const baseUrl = window.location.origin
-            const url = `${baseUrl}/projeto-link-direto/q/${publicId}`
+            // URL com Open Graph para WhatsApp (formato /p/)
+            const url = `${PRODUCTION_URL}/p/${publicId}`
             await navigator.clipboard.writeText(url)
 
             console.log("📋 Link copiado:", url)
@@ -133,6 +137,16 @@ export default function QuoteManager() {
         }
 
         setSaving(false)
+    }
+
+    async function copyLink() {
+        if (!quote?.publicId) return
+
+        const url = `${PRODUCTION_URL}/p/${quote.publicId}`
+        await navigator.clipboard.writeText(url)
+
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 3000)
     }
 
     if (loading) {
@@ -215,39 +229,105 @@ export default function QuoteManager() {
                 </div>
             )}
 
-            {/* Link público - SEMPRE DISPONÍVEL */}
+            {/* Link público - COM OPEN GRAPH */}
             <div style={{ marginTop: 16, padding: 16, borderRadius: 18, border: "1px solid #111827", background: "#111827" }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#fff" }}>📤 Gerar link para o cliente</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#fff" }}>📤 Link para WhatsApp</div>
                 <div style={{ marginTop: 4, fontSize: 13, color: "#9ca3af" }}>
-                    {quote.versions.length === 0
-                        ? "Link será gerado com o pacote completo"
-                        : `Link com ${quote.versions.length} versão(ões)`}
+                    {quote.publicId
+                        ? "Link com preview de imagem no WhatsApp"
+                        : quote.versions.length === 0
+                            ? "Link será gerado com o pacote completo"
+                            : `Link com ${quote.versions.length} versão(ões)`
+                    }
                 </div>
 
-                <button
-                    onClick={generateLink}
-                    disabled={saving}
-                    style={{
-                        marginTop: 12,
-                        padding: "12px 14px",
-                        borderRadius: 12,
-                        border: "none",
-                        background: saving ? "#9ca3af" : "#fff",
-                        color: "#111827",
-                        fontWeight: 900,
-                        cursor: saving ? "not-allowed" : "pointer",
-                        width: "100%",
-                        fontSize: 14,
-                    }}
-                >
-                    {saving ? "Gerando..." : copySuccess ? "✓ Link copiado!" : "📋 Gerar e Copiar Link"}
-                </button>
+                {/* Se já tem link, mostrar e permitir copiar */}
+                {quote.publicId ? (
+                    <>
+                        <div style={{
+                            marginTop: 12,
+                            padding: 12,
+                            background: "rgba(255,255,255,0.1)",
+                            borderRadius: 8,
+                            fontFamily: "monospace",
+                            fontSize: 12,
+                            color: "#d1d5db",
+                            wordBreak: "break-all"
+                        }}>
+                            {PRODUCTION_URL}/p/{quote.publicId}
+                        </div>
 
-                {quote.publicId && (
-                    <div style={{ marginTop: 8, fontSize: 11, color: "#9ca3af", fontFamily: "monospace", wordBreak: "break-all" }}>
-                        {window.location.origin}/projeto-link-direto/q/{quote.publicId}
-                    </div>
+                        <button
+                            onClick={copyLink}
+                            style={{
+                                marginTop: 12,
+                                padding: "12px 14px",
+                                borderRadius: 12,
+                                border: "none",
+                                background: copySuccess ? "#10b981" : "#fff",
+                                color: copySuccess ? "#fff" : "#111827",
+                                fontWeight: 900,
+                                cursor: "pointer",
+                                width: "100%",
+                                fontSize: 14,
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            {copySuccess ? "✓ Copiado!" : "📋 Copiar Link"}
+                        </button>
+
+                        <button
+                            onClick={generateLink}
+                            disabled={saving}
+                            style={{
+                                marginTop: 8,
+                                padding: "10px 14px",
+                                borderRadius: 10,
+                                border: "1px solid rgba(255,255,255,0.3)",
+                                background: "transparent",
+                                color: "#9ca3af",
+                                fontWeight: 600,
+                                cursor: saving ? "not-allowed" : "pointer",
+                                width: "100%",
+                                fontSize: 12,
+                            }}
+                        >
+                            {saving ? "Gerando..." : "🔄 Gerar novo link"}
+                        </button>
+                    </>
+                ) : (
+                    <button
+                        onClick={generateLink}
+                        disabled={saving}
+                        style={{
+                            marginTop: 12,
+                            padding: "12px 14px",
+                            borderRadius: 12,
+                            border: "none",
+                            background: saving ? "#9ca3af" : "#fff",
+                            color: "#111827",
+                            fontWeight: 900,
+                            cursor: saving ? "not-allowed" : "pointer",
+                            width: "100%",
+                            fontSize: 14,
+                        }}
+                    >
+                        {saving ? "Gerando..." : "📋 Gerar e Copiar Link"}
+                    </button>
                 )}
+
+                {/* Dica sobre Open Graph */}
+                <div style={{
+                    marginTop: 12,
+                    fontSize: 11,
+                    color: "#6b7280",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6
+                }}>
+                    <span>💡</span>
+                    <span>O link mostra prévia com foto do destino e nome do cliente no WhatsApp</span>
+                </div>
             </div>
 
             {/* Versões - OPCIONAL */}
