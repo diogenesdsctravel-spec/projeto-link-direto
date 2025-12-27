@@ -1,23 +1,24 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { extractQuoteFromFile, isAIConfigured, loadPDFJS } from "../../services/aiExtractionService"
+import { extractQuoteFromFiles, isAIConfigured, loadPDFJS } from "../../services/aiExtractionService"
 import { quoteRepository } from "../../services/hybridQuoteRepository"
 import { isSupabaseConfigured } from "../../services/supabaseClient"
 import { checkTemplateExists } from "../../services/destinationService"
 import type { ExtractedQuoteData } from "../../types/extractedQuoteData"
 
 /**
- * VENDOR HOME - COM SUPABASE
+ * VENDOR HOME - COM SUPORTE A MÚLTIPLOS ARQUIVOS
  * 
  * MUDANÇA: 
- * - Destino extraído automaticamente pela IA (sem dropdown)
- * - Se template não existe, redireciona para cadastro
+ * - Aceita múltiplos PDFs e imagens
+ * - Destino extraído automaticamente pela IA
+ * - Consolida dados de várias fontes
  */
 
 export default function VendorHome() {
     const navigate = useNavigate()
 
-    const [file, setFile] = useState<File | null>(null)
+    const [files, setFiles] = useState<File[]>([])
     const [clientName, setClientName] = useState("")
     const [destinationKey, setDestinationKey] = useState("")
     const [status, setStatus] = useState<"idle" | "loading" | "extracting" | "extracted" | "checking" | "saving" | "error">("idle")
@@ -31,17 +32,27 @@ export default function VendorHome() {
             .catch((err) => console.error("Erro ao carregar PDF.js:", err))
     }, [])
 
-    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const selectedFile = e.target.files?.[0] ?? null
-        setFile(selectedFile)
+    async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const selectedFiles = e.target.files ? Array.from(e.target.files) : []
+
+        if (selectedFiles.length === 0) {
+            setFiles([])
+            setStatus("idle")
+            setError("")
+            setExtractedData(null)
+            setDestinationKey("")
+            return
+        }
+
+        setFiles(selectedFiles)
         setStatus("idle")
         setError("")
         setExtractedData(null)
-        setDestinationKey("") // Limpar destino anterior
+        setDestinationKey("")
 
-        if (!selectedFile) return
-
-        if (selectedFile.type === "application/pdf" && !pdfReady) {
+        // Verificar se tem PDF e se PDF.js está pronto
+        const hasPDF = selectedFiles.some(f => f.type === "application/pdf")
+        if (hasPDF && !pdfReady) {
             setStatus("loading")
             setError("Aguarde, carregando suporte a PDF...")
 
@@ -50,7 +61,7 @@ export default function VendorHome() {
                 setPdfReady(true)
             } catch {
                 setStatus("error")
-                setError("Falha ao carregar suporte a PDF. Tente com uma imagem.")
+                setError("Falha ao carregar suporte a PDF. Tente com imagens.")
                 return
             }
         }
@@ -59,13 +70,13 @@ export default function VendorHome() {
             setStatus("extracting")
 
             try {
-                const result = await extractQuoteFromFile(selectedFile)
+                const result = await extractQuoteFromFiles(selectedFiles)
 
                 if (result.success && result.data) {
                     setExtractedData(result.data)
                     setStatus("extracted")
 
-                    // NOVO: Gerar destinationKey automaticamente do destino extraído
+                    // Gerar destinationKey automaticamente do destino extraído
                     if (result.data.destination) {
                         const key = result.data.destination
                             .toLowerCase()
@@ -82,6 +93,48 @@ export default function VendorHome() {
                 setStatus("error")
                 setError(err instanceof Error ? err.message : "Erro desconhecido")
             }
+        }
+    }
+
+    function removeFile(index: number) {
+        const newFiles = files.filter((_, i) => i !== index)
+        setFiles(newFiles)
+
+        if (newFiles.length === 0) {
+            setStatus("idle")
+            setExtractedData(null)
+            setDestinationKey("")
+        }
+    }
+
+    async function reextract() {
+        if (files.length === 0) return
+
+        setStatus("extracting")
+        setError("")
+
+        try {
+            const result = await extractQuoteFromFiles(files)
+
+            if (result.success && result.data) {
+                setExtractedData(result.data)
+                setStatus("extracted")
+
+                if (result.data.destination) {
+                    const key = result.data.destination
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/\s+/g, "-")
+                    setDestinationKey(key)
+                }
+            } else {
+                setStatus("error")
+                setError(result.error || "Erro ao extrair dados")
+            }
+        } catch (err) {
+            setStatus("error")
+            setError(err instanceof Error ? err.message : "Erro desconhecido")
         }
     }
 
@@ -159,20 +212,24 @@ export default function VendorHome() {
             <div style={{ marginTop: 18, padding: 16, borderRadius: 18, border: "1px solid #e5e7eb", background: "#ffffff" }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: "#111827" }}>Nova cotação</div>
                 <div style={{ marginTop: 6, fontSize: 13, color: "#6b7280" }}>
-                    Anexe o PDF ou imagem da cotação e a IA extrairá os dados automaticamente.
+                    Anexe o PDF da cotação + prints das conexões. A IA consolida tudo automaticamente.
                 </div>
 
                 <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
 
-                    {/* Upload */}
+                    {/* Upload múltiplo */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         <div style={{ fontSize: 13, color: "#111827", fontWeight: 800 }}>
-                            PDF ou Imagem da cotação
+                            PDFs e Imagens da cotação
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>
+                            💡 Adicione o PDF principal + prints com detalhes das conexões/escalas
                         </div>
                         <input
                             type="file"
                             accept="application/pdf,image/*"
-                            onChange={handleFileChange}
+                            multiple
+                            onChange={handleFilesChange}
                             disabled={status === "extracting" || status === "saving"}
                             style={{
                                 padding: "10px 12px",
@@ -181,6 +238,78 @@ export default function VendorHome() {
                                 fontSize: 13,
                             }}
                         />
+
+                        {/* Lista de arquivos selecionados */}
+                        {files.length > 0 && (
+                            <div style={{
+                                marginTop: 8,
+                                padding: 12,
+                                background: "#f9fafb",
+                                borderRadius: 10,
+                                border: "1px solid #e5e7eb"
+                            }}>
+                                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>
+                                    📎 {files.length} arquivo(s) selecionado(s):
+                                </div>
+                                {files.map((file, idx) => (
+                                    <div key={idx} style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        padding: "6px 8px",
+                                        background: "#fff",
+                                        borderRadius: 6,
+                                        marginBottom: 4,
+                                        border: "1px solid #e5e7eb"
+                                    }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <span style={{ fontSize: 16 }}>
+                                                {file.type === "application/pdf" ? "📄" : "🖼️"}
+                                            </span>
+                                            <span style={{ fontSize: 12, color: "#374151" }}>
+                                                {file.name}
+                                            </span>
+                                            <span style={{ fontSize: 11, color: "#9ca3af" }}>
+                                                ({(file.size / 1024).toFixed(0)} KB)
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => removeFile(idx)}
+                                            disabled={status === "extracting"}
+                                            style={{
+                                                padding: "2px 6px",
+                                                borderRadius: 4,
+                                                border: "none",
+                                                background: "#fee2e2",
+                                                color: "#dc2626",
+                                                fontSize: 11,
+                                                cursor: status === "extracting" ? "not-allowed" : "pointer"
+                                            }}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {status === "extracted" && (
+                                    <button
+                                        onClick={reextract}
+                                        style={{
+                                            marginTop: 8,
+                                            padding: "6px 12px",
+                                            borderRadius: 6,
+                                            border: "1px solid #d1d5db",
+                                            background: "#fff",
+                                            color: "#374151",
+                                            fontSize: 12,
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        🔄 Re-extrair dados
+                                    </button>
+                                )}
+                            </div>
+                        )}
 
                         {status === "extracting" && (
                             <div style={{
@@ -202,7 +331,7 @@ export default function VendorHome() {
                                     borderRadius: "50%",
                                     animation: "spin 1s linear infinite"
                                 }}></span>
-                                Extraindo dados com IA... (10-30s)
+                                Extraindo dados de {files.length} arquivo(s) com IA... (15-45s)
                             </div>
                         )}
 
@@ -215,7 +344,7 @@ export default function VendorHome() {
                                 borderRadius: 10,
                                 border: "1px solid #a7f3d0"
                             }}>
-                                ✅ Dados extraídos com sucesso!
+                                ✅ Dados extraídos e consolidados com sucesso!
                             </div>
                         )}
                     </div>
@@ -242,7 +371,7 @@ export default function VendorHome() {
                         />
                     </div>
 
-                    {/* NOVO: Destino extraído automaticamente (somente leitura) */}
+                    {/* Destino extraído automaticamente */}
                     {extractedData?.destination && (
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <div style={{ fontSize: 13, color: "#111827", fontWeight: 800 }}>Destino</div>
@@ -283,6 +412,38 @@ export default function VendorHome() {
                                     <div><strong>Hotel:</strong> {extractedData.hotel.name} ({extractedData.hotel.nights} noites)</div>
                                 )}
                                 <div><strong>Passageiros:</strong> {extractedData.passengers}</div>
+
+                                {/* Detalhes dos voos */}
+                                {extractedData.outboundFlight && (
+                                    <div style={{ marginTop: 8, padding: 8, background: "#fff", borderRadius: 8 }}>
+                                        <strong>✈️ Voo de ida:</strong> {extractedData.outboundFlight.stops} escala(s) - {extractedData.outboundFlight.totalDuration}
+                                        {extractedData.outboundFlight.segments && (
+                                            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>
+                                                {extractedData.outboundFlight.segments.map((seg: any, i: number) => (
+                                                    <div key={i}>
+                                                        {seg.departureAirport} → {seg.arrivalAirport} ({seg.flightNumber || "N/A"})
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {extractedData.returnFlight && (
+                                    <div style={{ marginTop: 4, padding: 8, background: "#fff", borderRadius: 8 }}>
+                                        <strong>✈️ Voo de volta:</strong> {extractedData.returnFlight.stops} escala(s) - {extractedData.returnFlight.totalDuration}
+                                        {extractedData.returnFlight.segments && (
+                                            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>
+                                                {extractedData.returnFlight.segments.map((seg: any, i: number) => (
+                                                    <div key={i}>
+                                                        {seg.departureAirport} → {seg.arrivalAirport} ({seg.flightNumber || "N/A"})
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div style={{ marginTop: 4 }}>
                                     <strong>Total:</strong>{" "}
                                     <span style={{ fontWeight: 700, color: "#059669", fontSize: 14 }}>
