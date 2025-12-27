@@ -3,6 +3,8 @@
  * 
  * Usa Supabase quando configurado, localStorage como fallback
  * Isso permite desenvolvimento local sem Supabase
+ * 
+ * ✅ CORRIGIDO: Cria versão padrão automaticamente na criação
  */
 
 import { supabaseQuoteRepository, type Quote, type QuoteVersion } from "./supabaseQuoteRepository"
@@ -57,6 +59,7 @@ const localStorageFallback = {
 export const quoteRepository = {
     /**
      * Cria nova cotação
+     * ✅ Já cria com versão padrão para o botão funcionar
      */
     async create(data: {
         clientName: string
@@ -64,12 +67,21 @@ export const quoteRepository = {
         extractedData?: any
     }): Promise<Quote> {
         const publicId = `q-${Date.now()}`
+
+        // ✅ Criar versão padrão automaticamente
+        const totalPrice = data.extractedData?.totalPrice || data.extractedData?.payment?.totalPrice || "A consultar"
+        const defaultVersion: QuoteVersion = {
+            versionId: "v1",
+            label: "Pacote Completo",
+            price: totalPrice
+        }
+
         const quote: Quote = {
             id: `quote-${Date.now()}`,
             publicId,
             clientName: data.clientName,
             destinationKey: data.destinationKey,
-            versions: [],
+            versions: [defaultVersion],  // ✅ Já inclui a versão padrão
             extractedData: data.extractedData,
             createdAt: new Date().toISOString()
         }
