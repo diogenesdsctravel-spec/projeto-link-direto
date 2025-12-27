@@ -7,8 +7,8 @@
 
 # Redirect para Open Graph preview (WhatsApp)
 [[redirects]]
-  from = "/p/*"
-  to = "/.netlify/functions/og-preview?id=:splat"
+  from = "/p/:id"
+  to = "/.netlify/functions/og-preview?id=:id"
   status = 200
 
 # SPA fallback
