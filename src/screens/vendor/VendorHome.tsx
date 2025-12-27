@@ -35,23 +35,26 @@ export default function VendorHome() {
     async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
         const selectedFiles = e.target.files ? Array.from(e.target.files) : []
 
-        if (selectedFiles.length === 0) {
-            setFiles([])
-            setStatus("idle")
-            setError("")
-            setExtractedData(null)
-            setDestinationKey("")
+        if (selectedFiles.length === 0) return
+
+        // ACUMULAR arquivos em vez de substituir
+        const newFiles = [...files, ...selectedFiles]
+        setFiles(newFiles)
+        setStatus("idle")
+        setError("")
+
+        // Limpar o input para permitir selecionar o mesmo arquivo novamente
+        e.target.value = ""
+    }
+
+    async function extractData() {
+        if (files.length === 0) {
+            setError("Adicione pelo menos um arquivo")
             return
         }
 
-        setFiles(selectedFiles)
-        setStatus("idle")
-        setError("")
-        setExtractedData(null)
-        setDestinationKey("")
-
         // Verificar se tem PDF e se PDF.js está pronto
-        const hasPDF = selectedFiles.some(f => f.type === "application/pdf")
+        const hasPDF = files.some(f => f.type === "application/pdf")
         if (hasPDF && !pdfReady) {
             setStatus("loading")
             setError("Aguarde, carregando suporte a PDF...")
@@ -66,52 +69,15 @@ export default function VendorHome() {
             }
         }
 
-        if (isAIConfigured()) {
-            setStatus("extracting")
-
-            try {
-                const result = await extractQuoteFromFiles(selectedFiles)
-
-                if (result.success && result.data) {
-                    setExtractedData(result.data)
-                    setStatus("extracted")
-
-                    // Gerar destinationKey automaticamente do destino extraído
-                    if (result.data.destination) {
-                        const key = result.data.destination
-                            .toLowerCase()
-                            .normalize("NFD")
-                            .replace(/[\u0300-\u036f]/g, "")
-                            .replace(/\s+/g, "-")
-                        setDestinationKey(key)
-                    }
-                } else {
-                    setStatus("error")
-                    setError(result.error || "Erro ao extrair dados")
-                }
-            } catch (err) {
-                setStatus("error")
-                setError(err instanceof Error ? err.message : "Erro desconhecido")
-            }
+        if (!isAIConfigured()) {
+            setError("IA não configurada")
+            return
         }
-    }
-
-    function removeFile(index: number) {
-        const newFiles = files.filter((_, i) => i !== index)
-        setFiles(newFiles)
-
-        if (newFiles.length === 0) {
-            setStatus("idle")
-            setExtractedData(null)
-            setDestinationKey("")
-        }
-    }
-
-    async function reextract() {
-        if (files.length === 0) return
 
         setStatus("extracting")
         setError("")
+        setExtractedData(null)
+        setDestinationKey("")
 
         try {
             const result = await extractQuoteFromFiles(files)
@@ -120,6 +86,7 @@ export default function VendorHome() {
                 setExtractedData(result.data)
                 setStatus("extracted")
 
+                // Gerar destinationKey automaticamente do destino extraído
                 if (result.data.destination) {
                     const key = result.data.destination
                         .toLowerCase()
@@ -136,6 +103,25 @@ export default function VendorHome() {
             setStatus("error")
             setError(err instanceof Error ? err.message : "Erro desconhecido")
         }
+    }
+
+    function removeFile(index: number) {
+        const newFiles = files.filter((_, i) => i !== index)
+        setFiles(newFiles)
+
+        if (newFiles.length === 0) {
+            setStatus("idle")
+            setExtractedData(null)
+            setDestinationKey("")
+        }
+    }
+
+    function clearAllFiles() {
+        setFiles([])
+        setStatus("idle")
+        setExtractedData(null)
+        setDestinationKey("")
+        setError("")
     }
 
     async function createQuote() {
@@ -248,8 +234,30 @@ export default function VendorHome() {
                                 borderRadius: 10,
                                 border: "1px solid #e5e7eb"
                             }}>
-                                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>
-                                    📎 {files.length} arquivo(s) selecionado(s):
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: 8
+                                }}>
+                                    <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
+                                        📎 {files.length} arquivo(s) adicionado(s):
+                                    </div>
+                                    <button
+                                        onClick={clearAllFiles}
+                                        disabled={status === "extracting"}
+                                        style={{
+                                            padding: "4px 8px",
+                                            borderRadius: 4,
+                                            border: "none",
+                                            background: "#fee2e2",
+                                            color: "#dc2626",
+                                            fontSize: 11,
+                                            cursor: status === "extracting" ? "not-allowed" : "pointer"
+                                        }}
+                                    >
+                                        Limpar todos
+                                    </button>
                                 </div>
                                 {files.map((file, idx) => (
                                     <div key={idx} style={{
@@ -291,9 +299,34 @@ export default function VendorHome() {
                                     </div>
                                 ))}
 
+                                {/* Botão Extrair Dados */}
+                                {status !== "extracted" && status !== "extracting" && (
+                                    <button
+                                        onClick={extractData}
+                                        style={{
+                                            marginTop: 10,
+                                            width: "100%",
+                                            padding: "10px 16px",
+                                            borderRadius: 8,
+                                            border: "none",
+                                            background: "#4f46e5",
+                                            color: "#fff",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: 8
+                                        }}
+                                    >
+                                        ✨ Extrair Dados com IA
+                                    </button>
+                                )}
+
                                 {status === "extracted" && (
                                     <button
-                                        onClick={reextract}
+                                        onClick={extractData}
                                         style={{
                                             marginTop: 8,
                                             padding: "6px 12px",
