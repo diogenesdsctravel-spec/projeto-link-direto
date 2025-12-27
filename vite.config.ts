@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
 
 export default defineConfig({
-  base: "/projeto-link-direto/",
+  base: "/",
   plugins: [
     react(),
     VitePWA({
@@ -16,16 +16,16 @@ export default defineConfig({
         theme_color: "#000000",
         background_color: "#000000",
         display: "standalone",
-        start_url: "/projeto-link-direto/",
-        scope: "/projeto-link-direto/",
+        start_url: "/",
+        scope: "/",
         icons: [
           {
-            src: "/projeto-link-direto/pwa-192x192.png",
+            src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src: "/projeto-link-direto/pwa-512x512.png",
+            src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png"
           }
