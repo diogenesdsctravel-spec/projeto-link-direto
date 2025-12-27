@@ -4,12 +4,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 async function fetchQuote(publicId) {
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/quotes?public_id=eq.${publicId}&select=*`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    }
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
   );
   const data = await response.json();
   return data[0] || null;
@@ -18,55 +13,32 @@ async function fetchQuote(publicId) {
 async function fetchDestination(destinationKey) {
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/destinations?destination_key=eq.${destinationKey}&select=*`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    }
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
   );
   const data = await response.json();
   return data[0] || null;
 }
 
 exports.handler = async (event) => {
-  // Tenta pegar de query string OU do path
   let publicId = event.queryStringParameters?.id;
-  
-  // Se não veio por query, tenta extrair do path /p/q-123
   if (!publicId && event.path) {
     const match = event.path.match(/\/p\/(q-\d+)/);
-    if (match) {
-      publicId = match[1];
-    }
+    if (match) publicId = match[1];
   }
-
-  if (!publicId) {
-    return {
-      statusCode: 400,
-      body: "Missing quote ID. Path: " + event.path + " Query: " + JSON.stringify(event.queryStringParameters),
-    };
-  }
+  if (!publicId) return { statusCode: 400, body: "Missing quote ID" };
 
   try {
     const quote = await fetchQuote(publicId);
-
-    if (!quote) {
-      return {
-        statusCode: 404,
-        body: "Quote not found",
-      };
-    }
+    if (!quote) return { statusCode: 404, body: "Quote not found" };
 
     const destination = await fetchDestination(quote.destination_key);
-
     const clientName = quote.client_name || "Cliente";
     const destinationName = destination?.destination_name || quote.destination_key || "Destino";
     const heroImage = destination?.hero_image_url || "https://dsc-travel.netlify.app/og-cover.jpg";
-    const siteUrl = `https://dsc-travel.netlify.app/q/${publicId}`;
-
+    const previewUrl = `https://dsc-travel.netlify.app/p/${publicId}`;
+    const appUrl = `https://dsc-travel.netlify.app/q/${publicId}`;
     const title = `${clientName}, sua viagem para ${destinationName} está pronta!`;
-    const description = `Confira o roteiro completo da sua viagem para ${destinationName}. DSC Travel - Experiências inesquecíveis.`;
+    const description = `Confira o roteiro completo da sua viagem para ${destinationName}. DSC Travel`;
 
     const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -79,30 +51,20 @@ exports.handler = async (event) => {
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
   <meta property="og:image" content="${heroImage}">
-  <meta property="og:url" content="${siteUrl}">
+  <meta property="og:url" content="${previewUrl}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
   <meta name="twitter:image" content="${heroImage}">
-  <meta http-equiv="refresh" content="0;url=${siteUrl}">
 </head>
 <body>
-  <p>Redirecionando...</p>
-  <script>window.location.href = "${siteUrl}";</script>
+  <p>Carregando...</p>
+  <script>window.location.href="${appUrl}";</script>
 </body>
 </html>`;
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-      },
-      body: html,
-    };
+    return { statusCode: 200, headers: { "Content-Type": "text/html; charset=utf-8" }, body: html };
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: "Error: " + error.message,
-    };
+    return { statusCode: 500, body: "Error: " + error.message };
   }
 };
