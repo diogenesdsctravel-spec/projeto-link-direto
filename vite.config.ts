@@ -9,6 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "robots.txt"],
+      // Excluir /p/* do Service Worker para permitir Open Graph
+      workbox: {
+        navigateFallbackDenylist: [/^\/p\//]
+      },
       manifest: {
         name: "DSC Travel",
         short_name: "DSC",
