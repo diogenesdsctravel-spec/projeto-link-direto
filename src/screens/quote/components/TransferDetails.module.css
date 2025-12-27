@@ -1,11 +1,12 @@
-/* TransferDetails.module.css - Detalhes do Transfer */
+/* TripDetailsContent.module.css - Overview do Voo de Ida */
 
+/* Container principal */
 .container {
-    height: calc(100vh - 120px);
-    display: flex;
-    flex-direction: column;
-    scroll-snap-align: start;
     position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
     overflow: hidden;
     background: #000;
 }
@@ -26,227 +27,216 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 30%, rgba(9, 7, 125, 0.95) 100%);
     z-index: 1;
 }
 
+/* Área de conteúdo - scroll para antes do botão */
 .content {
     position: relative;
     z-index: 10;
+    height: calc(100vh - 100px);
+    height: calc(100dvh - 100px);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    height: 100%;
     padding: 24px;
-    padding-top: 80px;
-    color: #ffffff;
+    padding-top: 48px;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Back Button */
-.backButton {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #ffffff;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin-bottom: auto;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
+.spacer {
+    flex: 1;
+    min-height: 40px;
 }
 
-.backIcon {
-    width: 20px;
-    height: 20px;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9));
-}
-
-/* Bottom Section */
-.bottom {
-    margin-top: auto;
-}
-
-/* Header */
-.header {
-    margin-bottom: 24px;
-}
-
-.titleRow {
+/* Badges */
+.badges {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
 
-.title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #ffffff;
-    margin: 0;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
-}
-
-.notIncludedBadge {
-    font-size: 12px;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.2);
-    padding: 4px 10px;
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
     border-radius: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-/* Route */
-.route {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #50cfad;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
-}
-
-.routeIcon {
+.badgeIcon {
     width: 16px;
     height: 16px;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9));
-}
-
-.routeText {
-    font-size: 14px;
-}
-
-/* Details Card */
-.detailsCard {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.detailRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-}
-
-.detailRow:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.detailLabel {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.detailValue {
-    font-size: 14px;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.detailIcon {
-    width: 16px;
-    height: 16px;
-}
-
-/* Free Cancellation */
-.freeCancellation {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     color: #50cfad;
-    padding-top: 12px;
 }
 
-.checkIcon {
-    width: 20px;
-    height: 20px;
-}
-
-/* Not Included Card */
-.notIncludedCard {
-    background: rgba(239, 68, 68, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.alertIcon {
-    width: 24px;
-    height: 24px;
-    color: #ef4444;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.notIncludedTitle {
-    font-size: 16px;
-    font-weight: 600;
+.badgeText {
     color: #ffffff;
-    margin: 0 0 8px 0;
-}
-
-.notIncludedText {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0;
-    line-height: 1.5;
+    font-weight: 500;
 }
 
-/* Info Card */
-.infoCard {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.infoTitle {
-    font-size: 16px;
-    font-weight: 600;
+/* Title section */
+.title {
+    font-size: 32px;
+    font-weight: 700;
     color: #ffffff;
+    line-height: 1.15;
     margin: 0 0 12px 0;
 }
 
-.infoList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+    margin: 0 0 24px 0;
 }
 
-.infoItem {
+/* Flight Card */
+.flightCard {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.flightRoute {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.infoIcon {
-    width: 16px;
-    height: 16px;
+.flightPoint {
+    text-align: left;
+}
+
+.flightPointRight {
+    text-align: right;
+}
+
+.flightTime {
+    font-size: 36px;
+    font-weight: 600;
+    color: #09077d;
+    margin-bottom: 4px;
+}
+
+.flightCode {
+    font-size: 14px;
+    font-weight: 600;
     color: #50cfad;
-    flex-shrink: 0;
+}
+
+.flightCity {
+    font-size: 13px;
+    color: #6b7280;
     margin-top: 2px;
 }
 
-.infoText {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+/* Duration middle section */
+.flightMiddle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px;
 }
 
-/* Botão Continuar */
-.button {
+.flightDuration {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.flightLine {
     width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.flightLineBorder {
+    flex: 1;
+    height: 1px;
+    background: #d1d5db;
+}
+
+.flightPlaneIcon {
+    width: 20px;
+    height: 20px;
+    color: #50cfad;
+    margin: 0 8px;
+    transform: rotate(90deg);
+}
+
+.flightAirline {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+/* Baggage section */
+.baggageSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.baggageItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.baggageIconIncluded {
+    color: #50cfad;
+}
+
+.baggageIconNotIncluded {
+    color: #d1d5db;
+}
+
+.baggageIconSmall {
+    width: 16px;
+    height: 16px;
+}
+
+.baggageIconMedium {
+    width: 20px;
+    height: 20px;
+}
+
+.baggageIconLarge {
+    width: 24px;
+    height: 24px;
+}
+
+.baggageText {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.baggageTextDisabled {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* CTA Button - FIXO no bottom */
+.button {
+    position: absolute;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 24px;
+    right: 24px;
     padding: 18px 24px;
     border-radius: 16px;
     border: none;
@@ -255,11 +245,14 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
-    margin-top: 16px;
-    transition: opacity 0.2s ease;
+    z-index: 50;
 }
 
-.button:active {
-    opacity: 0.9;
+.buttonArrow {
+    font-size: 20px;
 }

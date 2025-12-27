@@ -85,6 +85,16 @@ EXTRAIA DETALHADAMENTE:
    - Bagagem
    - Taxas
 
+7. REGIME ALIMENTAR DO HOTEL (mealPlan) - MUITO IMPORTANTE:
+   Procure por termos como:
+   - "All inclusive" ou "All Inclusive" → mealPlan: "All Inclusive"
+   - "Café da manhã incluso" → mealPlan: "Café da manhã incluso"
+   - "Meia pensão" → mealPlan: "Meia pensão"
+   - "Pensão completa" → mealPlan: "Pensão completa"
+   - "Apenas hospedagem" ou sem menção → mealPlan: null
+   
+   ATENÇÃO: Não invente! Se não encontrar informação sobre refeições, use null.
+
 ═══════════════════════════════════════════════════════════════
 
 Retorne APENAS JSON válido, sem markdown ou explicações:
@@ -189,7 +199,7 @@ Retorne APENAS JSON válido, sem markdown ou explicações:
     "nights": 6,
     "guests": "2 adultos",
     "roomType": "Quarto Standard",
-    "mealPlan": "Café da manhã incluso"
+    "mealPlan": "All Inclusive"
   },
   
   "transfers": {
@@ -280,6 +290,8 @@ IMPORTANTE:
 - Para transfers, se não mencionado, assuma included: false
 - Extraia TODOS os segmentos de voo, incluindo conexões
 - O totalPrice deve ser o valor TOTAL do pacote (base + adicionais se aplicável)
+- Para mealPlan: procure EXATAMENTE o que está escrito (All inclusive, Café da manhã, etc). NÃO INVENTE!
+- Se o hotel mostrar "All inclusive", o mealPlan DEVE ser "All Inclusive"
 `
 
 /**

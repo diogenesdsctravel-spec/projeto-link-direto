@@ -6,6 +6,8 @@
  * - Bagagem por trecho
  * - Tempo de conexão
  * - Resumo da viagem
+ * 
+ * ⚠️ PADRÃO: Botão CTA fixo no bottom, scroll não vaza
  */
 
 import { ArrowLeft, Clock, ChevronDown, Briefcase, Check, X, Backpack } from 'lucide-react'
@@ -48,7 +50,7 @@ export default function ReturnFlightDetailsScreen({
                 <p className={styles.headerSubtitle}>{destination} → {origin}</p>
             </div>
 
-            {/* Content */}
+            {/* Content - Área de scroll */}
             <div className={styles.content}>
                 {flight.segments.map((segment, index) => (
                     <div key={index}>
@@ -214,12 +216,12 @@ export default function ReturnFlightDetailsScreen({
                         <span className={styles.summaryValue}>{estimatedDistance}</span>
                     </div>
                 </div>
-
-                {/* View Budget Button */}
-                <button onClick={onViewBudget} className={styles.ctaButton}>
-                    <span>Ver orçamento completo</span>
-                </button>
             </div>
+
+            {/* CTA Button - FORA do scroll, fixo no bottom */}
+            <button onClick={onViewBudget} className={styles.ctaButton}>
+                <span>Ver orçamento completo</span>
+            </button>
         </div>
     )
 }

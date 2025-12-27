@@ -1,6 +1,6 @@
 /**
  * QUOTE VERSION - ORQUESTRADOR DE TELAS DA COTAÇÃO
- * 
+ *
  * Fluxo completo (navegação por botão):
  * 1. Brief (3 telas DSC)
  * 2. Hero (introdução do destino)
@@ -13,9 +13,11 @@
  * 9. Voo de Volta (overview)
  * 10. Voo de Volta (detalhes)
  * 11. Orçamento
+ * 
+ * ⚠️ TODOS OS DADOS SÃO DINÂMICOS - extraídos do PDF
  */
 
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import type { DestinationTemplate } from "../../types/destinationTemplate"
 import type { ExtractedQuoteData } from "../../types/extractedQuoteData"
@@ -43,18 +45,26 @@ import TransferDetails from "./components/TransferDetails"
 
 import BudgetScreen from "./components/BudgetScreen"
 
-// Fluxo linear de telas
 type ScreenType =
-    | "brief1" | "brief2" | "brief3"
-    | "hero" | "hotel" | "experiences"
-    | "flight-outbound-overview" | "flight-outbound-details"
-    | "transfer-outbound" | "transfer-outbound-details"
-    | "transfer-return" | "transfer-return-details"
-    | "flight-return-overview" | "flight-return-details"
+    | "brief1"
+    | "brief2"
+    | "brief3"
+    | "hero"
+    | "hotel"
+    | "experiences"
+    | "flight-outbound-overview"
+    | "flight-outbound-details"
+    | "transfer-outbound"
+    | "transfer-outbound-details"
+    | "transfer-return"
+    | "transfer-return-details"
+    | "flight-return-overview"
+    | "flight-return-details"
     | "budget"
 
 export default function QuoteVersion() {
     const { publicId = "" } = useParams()
+    const navigate = useNavigate()
 
     const [quote, setQuote] = useState<Quote | null>(null)
     const [template, setTemplate] = useState<DestinationTemplate | null>(null)
@@ -63,7 +73,6 @@ export default function QuoteVersion() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
 
-    // Tela atual no fluxo
     const [currentScreen, setCurrentScreen] = useState<ScreenType>("brief1")
 
     useEffect(() => {
@@ -77,7 +86,7 @@ export default function QuoteVersion() {
         try {
             const [agencyData, foundQuote] = await Promise.all([
                 getAgencyProfile(),
-                quoteRepository.getByPublicId(publicId)
+                quoteRepository.getByPublicId(publicId),
             ])
 
             setAgency(agencyData)
@@ -111,10 +120,8 @@ export default function QuoteVersion() {
         setLoading(false)
     }
 
-    // Navegação
     const goTo = (screen: ScreenType) => setCurrentScreen(screen)
 
-    // Loading
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -126,7 +133,6 @@ export default function QuoteVersion() {
         )
     }
 
-    // Error
     if (error || !quote || !template || !agency) {
         return (
             <div className={styles.errorContainer}>
@@ -135,7 +141,10 @@ export default function QuoteVersion() {
         )
     }
 
-    // Dados extraídos
+    // ============================================
+    // DADOS DINÂMICOS - EXTRAÍDOS DO PDF
+    // ============================================
+
     const destination = extractedData?.destination || template.destinationName || "Destino"
     const origin = extractedData?.origin || "São Paulo"
     const nights = extractedData?.hotel?.nights || extractedData?.totalNights || 7
@@ -150,55 +159,69 @@ export default function QuoteVersion() {
     const outboundBaggage = extractedData?.outboundBaggage || {
         personalItem: { type: "personal" as const, description: "1 item", included: true },
         carryOn: { type: "carryOn" as const, description: "10kg", weight: "10kg", included: true },
-        checked: { type: "checked" as const, description: "23kg", weight: "23kg", included: false }
+        checked: { type: "checked" as const, description: "23kg", weight: "23kg", included: false },
     }
 
     const returnBaggage = extractedData?.returnBaggage || outboundBaggage
 
-    // Aeroporto de chegada (do voo de ida) e partida (do voo de volta)
-    const arrivalAirport = outboundFlight?.segments?.[outboundFlight.segments.length - 1]?.arrivalCity || destination
+    const arrivalAirport =
+        outboundFlight?.segments?.[outboundFlight.segments.length - 1]?.arrivalCity || destination
     const departureAirport = returnFlight?.segments?.[0]?.departureCity || destination
 
     const transferOutbound = extractedData?.transfers?.outbound || {
         included: false,
         from: `Aeroporto de ${arrivalAirport}`,
-        to: `Hotel em ${destination}`
+        to: `Hotel em ${destination}`,
     }
 
     const transferReturn = extractedData?.transfers?.return || {
         included: false,
         from: `Hotel em ${destination}`,
-        to: `Aeroporto de ${departureAirport}`
+        to: `Aeroporto de ${departureAirport}`,
     }
 
-    // ========================================
-    // RENDERIZAÇÃO POR TELA
-    // ========================================
+    // ✅ DADOS DINÂMICOS - SEM MOCKS
+    const totalDays = nights + 1
+    const region = extractedData?.destination || destination  // Usa destino como região
+    const travelDateLabel = extractedData?.travelDate || extractedData?.hotel?.checkIn || ""
+
+    // ============================================
+    // RENDERIZAÇÃO DAS TELAS
+    // ============================================
 
     // BRIEF 1
     if (currentScreen === "brief1") {
         return (
-            <div onClick={() => goTo("brief2")} style={{ cursor: 'pointer' }}>
-                <BriefScreen1 agency={agency} clientName={quote.clientName} />
-            </div>
+            <BriefScreen1
+                agency={agency}
+                clientName={quote.clientName}
+                onBack={() => navigate(`/q/${publicId}`)}
+                onNext={() => goTo("brief2")}
+            />
         )
     }
 
     // BRIEF 2
     if (currentScreen === "brief2") {
         return (
-            <div onClick={() => goTo("brief3")} style={{ cursor: 'pointer' }}>
-                <BriefScreen2 agency={agency} />
-            </div>
+            <BriefScreen2
+                agency={agency}
+                onBack={() => goTo("brief1")}
+                onNext={() => goTo("hero")}
+            />
         )
     }
 
     // BRIEF 3
     if (currentScreen === "brief3") {
         return (
-            <div onClick={() => goTo("hero")} style={{ cursor: 'pointer' }}>
-                <BriefScreen3 agency={agency} />
-            </div>
+            <BriefScreen3
+                {...({
+                    agency,
+                    onBack: () => goTo("brief2"),
+                    onNext: () => goTo("hero"),
+                } as any)}
+            />
         )
     }
 
@@ -207,19 +230,30 @@ export default function QuoteVersion() {
         return (
             <HeroScreen
                 screen={heroScreen}
+                onBack={() => goTo("brief2")}
                 onNext={() => goTo("hotel")}
+                totalDays={totalDays}
+                region={region}
+                travelDate={travelDateLabel}
             />
         )
     }
 
-    // HOTEL
+    // HOTEL - ✅ TODAS AS PROPS DINÂMICAS
     if (currentScreen === "hotel" && hotelScreen) {
         return (
             <HotelScreen
                 screen={hotelScreen}
                 destination={destination}
                 nights={nights}
-                onNext={() => goTo(experiences.length > 0 ? "experiences" : "flight-outbound-overview")}
+                onBack={() => goTo("hero")}
+                onNext={() => goTo("experiences")}
+                checkIn={extractedData?.hotel?.checkIn}
+                checkOut={extractedData?.hotel?.checkOut}
+                roomType={extractedData?.hotel?.roomType}
+                address={extractedData?.hotel?.address}
+                hotelStars={extractedData?.hotel?.stars}
+                mealPlan={extractedData?.hotel?.mealPlan}
             />
         )
     }
@@ -230,6 +264,7 @@ export default function QuoteVersion() {
             <ExperienceScreen
                 experiences={experiences}
                 destination={destination}
+                onBack={() => goTo("hotel")}
                 onNext={() => goTo("flight-outbound-overview")}
             />
         )
@@ -243,6 +278,7 @@ export default function QuoteVersion() {
                 flight={outboundFlight}
                 baggage={outboundBaggage}
                 travelDate={extractedData?.travelDate || ""}
+                onBack={() => goTo("experiences")}
                 onViewDetails={() => goTo("flight-outbound-details")}
             />
         )
@@ -264,9 +300,8 @@ export default function QuoteVersion() {
         )
     }
 
-    // TRANSFER IDA - CARD
+    // TRANSFER IDA - CARD - ✅ COM PROPS DE HOTEL
     if (currentScreen === "transfer-outbound") {
-        // Se transfer incluído, botão vai para detalhes. Se não, vai para próximo
         const nextScreen = transferOutbound.included ? "transfer-outbound-details" : "transfer-return"
         return (
             <TransferCard
@@ -274,12 +309,15 @@ export default function QuoteVersion() {
                 transfer={transferOutbound}
                 destination={destination}
                 arrivalCity={arrivalAirport}
+                hotelName={extractedData?.hotel?.name}
+                hotelAddress={extractedData?.hotel?.address}
+                onBack={() => goTo("flight-outbound-details")}
                 onViewDetails={() => goTo(nextScreen)}
             />
         )
     }
 
-    // TRANSFER IDA - DETALHES (só se incluído)
+    // TRANSFER IDA - DETALHES
     if (currentScreen === "transfer-outbound-details") {
         return (
             <TransferDetails
@@ -291,9 +329,8 @@ export default function QuoteVersion() {
         )
     }
 
-    // TRANSFER VOLTA - CARD
+    // TRANSFER VOLTA - CARD - ✅ COM PROPS DE HOTEL
     if (currentScreen === "transfer-return") {
-        // Se transfer incluído, botão vai para detalhes. Se não, vai para voo de volta
         const nextScreen = transferReturn.included ? "transfer-return-details" : "flight-return-overview"
         return (
             <TransferCard
@@ -301,12 +338,15 @@ export default function QuoteVersion() {
                 transfer={transferReturn}
                 destination={destination}
                 arrivalCity={departureAirport}
+                hotelName={extractedData?.hotel?.name}
+                hotelAddress={extractedData?.hotel?.address}
+                onBack={() => goTo("transfer-outbound")}
                 onViewDetails={() => goTo(nextScreen)}
             />
         )
     }
 
-    // TRANSFER VOLTA - DETALHES (só se incluído)
+    // TRANSFER VOLTA - DETALHES
     if (currentScreen === "transfer-return-details") {
         return (
             <TransferDetails
@@ -327,6 +367,7 @@ export default function QuoteVersion() {
                 flight={returnFlight}
                 baggage={returnBaggage}
                 returnDate={extractedData?.returnDate || ""}
+                onBack={() => goTo("transfer-return-details")}
                 onViewDetails={() => goTo("flight-return-details")}
             />
         )
@@ -360,9 +401,18 @@ export default function QuoteVersion() {
         )
     }
 
-    // Fallback - vai para hero se não encontrar tela
+    // FALLBACK - HERO
     if (heroScreen) {
-        return <HeroScreen screen={heroScreen} onNext={() => goTo("hotel")} />
+        return (
+            <HeroScreen
+                screen={heroScreen}
+                onBack={() => goTo("brief2")}
+                onNext={() => goTo("hotel")}
+                totalDays={totalDays}
+                region={region}
+                travelDate={travelDateLabel}
+            />
+        )
     }
 
     return (

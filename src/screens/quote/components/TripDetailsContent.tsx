@@ -4,7 +4,7 @@
  * Exibe resumo do voo de ida com dados dinâmicos extraídos do PDF
  */
 
-import { Plane, MapPin, Calendar, Briefcase, Backpack } from 'lucide-react'
+import { Plane, MapPin, Calendar, Briefcase, Backpack, ArrowLeft } from 'lucide-react'
 import styles from './TripDetailsContent.module.css'
 import type { FlightLeg, BaggageInfo } from '../../../types/extractedQuoteData'
 
@@ -14,6 +14,7 @@ interface TripDetailsContentProps {
     baggage: BaggageInfo
     travelDate: string
     backgroundImage?: string
+    onBack?: () => void
     onViewDetails: () => void
 }
 
@@ -22,7 +23,8 @@ export default function TripDetailsContent({
     flight,
     baggage,
     travelDate,
-    backgroundImage = "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80",
+    backgroundImage = "https://www.melhoresdestinos.com.br/wp-content/uploads/2023/01/aviao-flap-capa.jpg",
+    onBack,
     onViewDetails
 }: TripDetailsContentProps) {
     // Pegar primeiro e último segmento para mostrar origem → destino
@@ -56,6 +58,13 @@ export default function TripDetailsContent({
 
             {/* Overlay */}
             <div className={styles.overlay} />
+
+            {/* Botão voltar */}
+            {onBack && (
+                <button className={styles.backButton} onClick={onBack}>
+                    <ArrowLeft size={20} />
+                </button>
+            )}
 
             {/* Content */}
             <div className={styles.content}>

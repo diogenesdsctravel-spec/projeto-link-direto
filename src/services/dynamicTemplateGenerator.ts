@@ -83,25 +83,71 @@ function generateHeroScreen(
     destinationData: Destination | null
 ): ScreenTemplate {
     const nights = data.totalNights || data.hotel?.nights || 7
+    const days = nights + 1  // Dias = noites + 1
     const destination = data.destination || "seu destino"
 
-    void nights
-    void destination
-
-    // Usar dados do banco se existirem
+    // Usar heroScreenImageUrl (tela 4) - separado de coverImageUrl (tela 1)
     const heroImage =
+        destinationData?.heroScreenImageUrl ||
         destinationData?.heroImageUrl ||
         "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1200"
+
+    // Gerar body dinâmico baseado no destino
+    const bodyText = generateHeroBody(destination, days, destinationData)
 
     return {
         screenId: "hero",
         type: "hero",
-        title: `${clientName},`,
-        subtitle: "Alguns dias pensados para você desacelerar.",
-        body: "Tudo já está cuidado. Você só precisa estar presente.",
+        title: destination.toUpperCase(),
+        subtitle: "Você está indo.",
+        body: bodyText,
         imageUrl: heroImage,
         includedStatus: "included"
     }
+}
+
+/**
+ * Gera texto do Hero baseado no destino
+ */
+function generateHeroBody(destination: string, days: number, destinationData: Destination | null): string {
+    // Se tiver descrição no banco, usa ela
+    if (destinationData?.heroDescription) {
+        return destinationData.heroDescription
+    }
+
+    const lowerDest = destination.toLowerCase()
+
+    // Textos específicos por destino
+    if (lowerDest.includes("cancun") || lowerDest.includes("cancún")) {
+        return `${days} dias entre praias caribenhas, ruínas maias e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("buenos")) {
+        return `${days} dias entre tangos, parrillas e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("gramado") || lowerDest.includes("serra gaúcha")) {
+        return `${days} dias entre montanhas, chocolate e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("rio")) {
+        return `${days} dias entre praias, morros e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("paris")) {
+        return `${days} dias entre arte, romance e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("orlando") || lowerDest.includes("disney")) {
+        return `${days} dias entre magia, parques e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    if (lowerDest.includes("lisboa") || lowerDest.includes("portugal")) {
+        return `${days} dias entre história, pastéis de nata e momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
+    }
+
+    // Fallback genérico
+    return `${days} dias em ${destination}, vivendo momentos que você vai querer pausar.\n\nRespira. "Você merece isso."`
 }
 
 /**
@@ -254,19 +300,53 @@ function generateHotelScreen(
                 "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800"
             ]
 
-    // Usar descrição do banco se existir
-    const shortDescription = hotelData?.shortDescription || `Seu refúgio em ${destination}`
+    // Usar descrição do banco se existir, senão gera dinamicamente
+    const shortDescription = hotelData?.shortDescription || generateHotelDescription(destination)
+
+    // Body com informações estruturadas (não texto corrido)
+    // O HotelScreen vai usar as props individuais, não o body
+    const body = shortDescription
 
     return {
         screenId: "hotel",
         type: "hotel",
         title: `${hotel.name} ${stars}`,
         subtitle: shortDescription,
-        body: `${hotel.nights} noites no coração da cidade.\n\nCheck-in: ${checkInDate} às ${hotel.checkInTime}\nCheck-out: ${checkOutDate} às ${hotel.checkOutTime}\n\nQuarto: ${hotel.roomType}\nEndereço: ${hotel.address}`,
+        body: body,
         imageUrl: hotelImages[0],
         hotelCarouselImageUrls: hotelImages,
         includedStatus: "included"
     }
+}
+
+/**
+ * Gera descrição do hotel baseada no destino
+ */
+function generateHotelDescription(destination: string): string {
+    const lowerDest = destination.toLowerCase()
+
+    if (lowerDest.includes("cancun") || lowerDest.includes("cancún")) {
+        return `Imagine acordar aqui. Seu refúgio em ${destination}. Perto das praias, mas longe do barulho. Um lugar onde o luxo encontra o Caribe.`
+    }
+
+    if (lowerDest.includes("buenos")) {
+        return `Imagine acordar aqui. Seu refúgio em ${destination}. Perto de tudo, mas longe do barulho. Um lugar onde o charme portenho encontra o conforto.`
+    }
+
+    if (lowerDest.includes("gramado") || lowerDest.includes("serra")) {
+        return `Imagine acordar aqui. Seu refúgio em ${destination}. Perto de tudo, mas longe do barulho. Um lugar onde o luxo encontra a natureza.`
+    }
+
+    if (lowerDest.includes("rio")) {
+        return `Imagine acordar aqui. Seu refúgio no ${destination}. Perto das praias, mas longe do barulho. Um lugar onde o conforto encontra a cidade maravilhosa.`
+    }
+
+    if (lowerDest.includes("orlando") || lowerDest.includes("disney")) {
+        return `Imagine acordar aqui. Seu refúgio em ${destination}. Perto da magia, mas com todo o conforto que você merece.`
+    }
+
+    // Fallback genérico
+    return `Imagine acordar aqui. Seu refúgio em ${destination}. Perto de tudo, mas longe do barulho. Um lugar onde o conforto abraça a tranquilidade.`
 }
 
 /**

@@ -1,114 +1,187 @@
+/* Container */
 .container {
-    height: calc(100vh - 200px);
-    display: flex;
-    flex-direction: column;
-    scroll-snap-align: start;
     position: relative;
+    width: 100%;
+    height: calc(100vh - 200px);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
 }
 
+/* Background com zoom sutil */
 .background {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
-.image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+.backgroundImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    animation: subtleZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes subtleZoom {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.05);
+    }
 }
 
 .overlay {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse at center,
+            rgba(9, 7, 125, 0.35) 0%,
+            rgba(9, 7, 125, 0.55) 50%,
+            rgba(9, 7, 125, 0.75) 100%),
+        linear-gradient(to bottom,
+            rgba(9, 7, 125, 0.25) 0%,
+            rgba(9, 7, 125, 0.3) 40%,
+            rgba(9, 7, 125, 0.9) 100%);
 }
 
+/* Content */
 .content {
     position: relative;
-    z-index: 1;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    z-index: 2;
     height: 100%;
-    padding-bottom: 48px;
-    padding-top: 48px;
-}
-
-.textContent {
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    flex: 1;
+    padding: 32px 24px;
+    padding-bottom: 140px;
+    /* Espaço para botão + dots absolutos */
 }
 
-.title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0;
+/* Badge emocional - posição absoluta no topo */
+.badge {
+    position: absolute;
+    top: 48px;
+    /* Ajuste aqui: menor = mais pra cima, maior = mais pra baixo */
+    left: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
 }
 
-.subtitle {
-    font-size: 17px;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 12px;
-    margin-bottom: 0;
-    line-height: 1.5;
-}
-
-.items {
-    margin-top: 32px;
+/* Grupo de títulos - ajuste margin-top para subir/descer o texto */
+.titleGroup {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    text-align: center;
+    margin-top: -40px;
+    /* Negativo sobe, positivo desce */
 }
 
-.item {
-    margin: 0;
+/* Título principal */
+.mainTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px 0;
 }
 
-.itemTitle {
-    font-size: 18px;
+/* Ênfase principal - 48px */
+.emphasis {
+    font-size: 48px;
     font-weight: 600;
+    letter-spacing: 2px;
     color: #ffffff;
+    display: block;
+    line-height: 1.1;
+}
+
+/* Texto de conexão */
+.connector {
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.85);
+    display: block;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+/* Descrição */
+.description {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
     margin: 0;
+    max-width: 340px;
 }
 
-.itemText {
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 4px;
-    margin-bottom: 0;
+.description strong {
+    font-weight: 600;
+    color: #50CFAD;
 }
 
-.button {
-    margin-top: 32px;
+/* CTA - posição absoluta no bottom */
+.ctaButton {
+    position: absolute;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    left: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 18px 24px;
     background: #50cfad;
     color: #09077d;
     border: none;
     border-radius: 16px;
-    padding: 18px 24px;
-    width: 100%;
-    font-weight: 600;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    font-family: system-ui;
+    box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
 }
 
-.button:active {
-    opacity: 0.9;
+/* Progress dots - posição absoluta no bottom */
+.progressHint {
+    position: absolute;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.progressDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
 }

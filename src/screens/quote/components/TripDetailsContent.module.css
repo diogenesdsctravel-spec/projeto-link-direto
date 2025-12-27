@@ -1,11 +1,12 @@
 /* TripDetailsContent.module.css - Overview do Voo de Ida */
 
+/* Container principal */
 .container {
-    height: calc(100vh - 200px);
-    display: flex;
-    flex-direction: column;
-    scroll-snap-align: start;
     position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
     overflow: hidden;
     background: #000;
 }
@@ -26,18 +27,41 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 30%, rgba(9, 7, 125, 0.95) 100%);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, transparent 40%, rgba(9, 7, 125, 0.95) 100%);
     z-index: 1;
 }
 
+/* Botão voltar */
+.backButton {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(9, 7, 125, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: none;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+}
+
+/* Área de conteúdo - flexbox para empurrar conteúdo para baixo */
 .content {
     position: relative;
     z-index: 10;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
-    flex: 1;
     padding: 24px;
-    padding-top: 48px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
 }
 
 .spacer {
@@ -60,6 +84,7 @@
     border-radius: 50px;
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .badgeIcon {
@@ -90,13 +115,13 @@
     margin: 0 0 24px 0;
 }
 
-/* Flight Card */
+/* Flight Card - contém o botão dentro */
 .flightCard {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 16px;
 }
 
 .flightRoute {
@@ -223,9 +248,10 @@
     color: #9ca3af;
 }
 
-/* CTA Button */
+/* CTA Button - DENTRO do flow, não fixo */
 .button {
     width: 100%;
+    margin-top: 16px;
     padding: 18px 24px;
     border-radius: 16px;
     border: none;
@@ -239,11 +265,6 @@
     justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
-    transition: opacity 0.2s ease;
-}
-
-.button:active {
-    opacity: 0.9;
 }
 
 .buttonArrow {

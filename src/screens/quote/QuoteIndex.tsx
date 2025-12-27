@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { applyHeadMeta } from "../../services/headMeta"
 import { quoteRepository, type Quote } from "../../services/hybridQuoteRepository"
 import { getDestinationByKey, type Destination } from "../../services/destinationService"
@@ -11,7 +12,64 @@ import logo from "../../assets/logo_dsc_travel.png"
  * 
  * Primeira tela que o cliente vê ao abrir o link da cotação.
  * Layout full-screen com foto do destino e CTA para ver o roteiro.
+ * 
+ * 🎬 ANIMAÇÕES:
+ * - Background: zoom sutil de entrada
+ * - Logo: fade in de cima
+ * - Chips: fade in com stagger
+ * - Título: fade in de baixo
+ * - Subtítulo: fade in de baixo (delay)
+ * - Botão: fade in de baixo (delay maior) + hover/tap effects
  */
+
+// Variantes de animação - SUAVES E LENTAS (estilo Figma/Apple)
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.12,
+            delayChildren: 0.6
+        }
+    }
+}
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1] // cubic-bezier suave
+        }
+    }
+}
+
+const logoVariants = {
+    hidden: { opacity: 0, y: -15 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 1,
+            ease: [0.25, 0.1, 0.25, 1],
+            delay: 0.2
+        }
+    }
+}
+
+const chipVariants = {
+    hidden: { opacity: 0, x: -15 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: {
+            duration: 0.7,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    }
+}
 
 export default function QuoteIndex() {
     const { publicId = "" } = useParams()
@@ -112,22 +170,22 @@ export default function QuoteIndex() {
                 }}
             >
                 <div style={{ textAlign: "center" }}>
-                    <div
+                    <motion.div
                         style={{
                             width: 40,
                             height: 40,
                             border: "3px solid rgba(255,255,255,0.2)",
                             borderTopColor: "#50cfad",
                             borderRadius: "50%",
-                            animation: "spin 1s linear infinite",
                             margin: "0 auto",
                         }}
-                    ></div>
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
                     <p style={{ marginTop: 16, color: "rgba(255,255,255,0.7)" }}>
                         Preparando sua experiência...
                     </p>
                 </div>
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         )
     }
@@ -184,8 +242,11 @@ export default function QuoteIndex() {
                 flexDirection: "column",
             }}
         >
-            {/* Background Image */}
-            <div
+            {/* Background Image com zoom sutil */}
+            <motion.div
+                initial={{ scale: 1.05, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 2, ease: [0.25, 0.1, 0.25, 1] }}
                 style={{
                     position: "absolute",
                     top: 0,
@@ -209,10 +270,13 @@ export default function QuoteIndex() {
                         background: "linear-gradient(to bottom, rgba(9, 7, 125, 0.4) 0%, transparent 30%, rgba(9, 7, 125, 0.95) 100%)",
                     }}
                 />
-            </div>
+            </motion.div>
 
             {/* Logo no topo */}
-            <div
+            <motion.div
+                variants={logoVariants}
+                initial="hidden"
+                animate="visible"
                 style={{
                     position: "relative",
                     zIndex: 10,
@@ -229,10 +293,13 @@ export default function QuoteIndex() {
                         objectFit: "contain",
                     }}
                 />
-            </div>
+            </motion.div>
 
             {/* Conteúdo principal */}
-            <div
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
                 style={{
                     position: "relative",
                     zIndex: 10,
@@ -245,7 +312,8 @@ export default function QuoteIndex() {
                 }}
             >
                 {/* Chips */}
-                <div
+                <motion.div
+                    variants={itemVariants}
                     style={{
                         display: "flex",
                         alignItems: "center",
@@ -254,7 +322,8 @@ export default function QuoteIndex() {
                     }}
                 >
                     {/* Chip: Roteiro exclusivo */}
-                    <div
+                    <motion.div
+                        variants={chipVariants}
                         style={{
                             display: "flex",
                             alignItems: "center",
@@ -281,10 +350,11 @@ export default function QuoteIndex() {
                         <span style={{ color: "#ffffff", fontSize: 14, fontWeight: 500 }}>
                             Roteiro exclusivo
                         </span>
-                    </div>
+                    </motion.div>
 
                     {/* Chip: X dias */}
-                    <div
+                    <motion.div
+                        variants={chipVariants}
                         style={{
                             display: "flex",
                             alignItems: "center",
@@ -313,37 +383,57 @@ export default function QuoteIndex() {
                         <span style={{ color: "#ffffff", fontSize: 14, fontWeight: 500 }}>
                             {totalDays} dias
                         </span>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
-                {/* Headline */}
-                <h1
+                {/* 1️⃣ Nome do cliente - 48px, Semibold, branco */}
+                <motion.h1
+                    variants={itemVariants}
                     style={{
                         margin: 0,
-                        fontSize: 32,
-                        fontWeight: 700,
+                        fontSize: 48,
+                        fontWeight: 600,
                         color: "#ffffff",
-                        lineHeight: 1.15,
+                        lineHeight: 1.1,
                     }}
                 >
-                    Sua viagem dos sonhos em {destinationName}, {clientName}
-                </h1>
+                    {clientName},
+                </motion.h1>
 
-                {/* Subtítulo */}
-                <p
+                {/* 2️⃣ Texto secundário - 28px, Regular, branco suavizado */}
+                <motion.p
+                    variants={itemVariants}
                     style={{
                         margin: 0,
                         marginTop: 12,
+                        fontSize: 28,
+                        fontWeight: 400,
+                        color: "rgba(255, 255, 255, 0.85)",
+                        lineHeight: 1.4,
+                    }}
+                >
+                    sua viagem para <span style={{ fontWeight: 500, color: "rgba(255, 255, 255, 0.95)" }}>{destinationName}</span> começa aqui
+                </motion.p>
+
+                {/* 3️⃣ Subtítulo/descrição */}
+                <motion.p
+                    variants={itemVariants}
+                    style={{
+                        margin: 0,
+                        marginTop: 16,
                         fontSize: 16,
                         color: "rgba(255, 255, 255, 0.8)",
                         lineHeight: 1.5,
                     }}
                 >
                     {coverSubtitle}
-                </p>
+                </motion.p>
 
                 {/* Botão CTA */}
-                <button
+                <motion.button
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
+                    whileTap={{ scale: 0.99, transition: { duration: 0.1 } }}
                     onClick={handleViewItinerary}
                     disabled={quote.versions.length === 0}
                     style={{
@@ -362,7 +452,6 @@ export default function QuoteIndex() {
                         justifyContent: "center",
                         gap: 8,
                         boxShadow: "0 4px 20px rgba(80, 207, 173, 0.3)",
-                        transition: "transform 0.2s ease",
                     }}
                 >
                     <span>Ver roteiro completo</span>
@@ -378,8 +467,8 @@ export default function QuoteIndex() {
                     >
                         <polyline points="9 18 15 12 9 6" />
                     </svg>
-                </button>
-            </div>
+                </motion.button>
+            </motion.div>
         </div>
     )
 }

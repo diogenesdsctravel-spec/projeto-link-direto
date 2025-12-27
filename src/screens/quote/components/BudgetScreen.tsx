@@ -3,10 +3,12 @@
  * 
  * Exibe:
  * - Detalhes da viagem (passageiros, noites, destino)
- * - Preço do pacote base
- * - Itens adicionais (passeios, seguro)
  * - Valor total com parcelamento
  * - O que está incluso
+ * - Itens adicionais (se houver)
+ * 
+ * ⚠️ TODOS OS DADOS SÃO DINÂMICOS - extraídos do PDF
+ * ⚠️ PADRÃO: Botão CTA fixo no bottom, scroll não vaza
  */
 
 import { ArrowLeft, Users, Calendar, Palmtree, Check } from 'lucide-react'
@@ -62,9 +64,10 @@ export default function BudgetScreen({
     // Itens inclusos padrão se não extraídos
     const defaultIncludedItems: IncludedItem[] = [
         { name: 'Voos de ida e volta', included: true },
-        { name: `${totalNights} noites de hotel`, included: true },
-        { name: hotel?.mealPlan || 'Café da manhã', included: true },
+        { name: `${totalNights || 0} noites de hotel`, included: true },
+        { name: hotel?.mealPlan || 'Café da manhã', included: !!hotel?.mealPlan },
         { name: 'Transfers', included: data.transfers?.outbound?.included || false },
+        { name: 'Bagagem de mão', included: data.outboundBaggage?.carryOn?.included || true },
         { name: 'Taxas de embarque', included: true }
     ]
 
@@ -72,6 +75,26 @@ export default function BudgetScreen({
 
     // Nome do passageiro principal
     const mainPassengerName = passengerNames?.[0] || clientName || 'Viajante'
+
+    // Texto dos passageiros
+    const getPassengersText = () => {
+        if (passengerNames && passengerNames.length > 0) {
+            return passengerNames.join(' e ')
+        }
+        return `${mainPassengerName} e acompanhante`
+    }
+
+    // Texto do pacote (Voos + Hotel + regime alimentar)
+    const getPackageText = () => {
+        const parts = ['Voos', 'Hotel']
+        if (hotel?.mealPlan) {
+            parts.push(hotel.mealPlan)
+        }
+        if (data.transfers?.outbound?.included) {
+            parts.push('Transfers')
+        }
+        return parts.join(' + ')
+    }
 
     return (
         <div className={styles.container}>
@@ -88,7 +111,7 @@ export default function BudgetScreen({
                 </p>
             </div>
 
-            {/* Content */}
+            {/* Content - Área de scroll */}
             <div className={styles.content}>
                 {/* Trip Summary Card */}
                 <div className={styles.card}>
@@ -101,10 +124,8 @@ export default function BudgetScreen({
                                 <Users className={styles.detailIcon} />
                             </div>
                             <div>
-                                <p className={styles.detailText}>{passengers}</p>
-                                <p className={styles.detailSubtext}>
-                                    {passengerNames?.join(' e ') || `${mainPassengerName} e acompanhante`}
-                                </p>
+                                <p className={styles.detailText}>{passengers || '2 adultos'}</p>
+                                <p className={styles.detailSubtext}>{getPassengersText()}</p>
                             </div>
                         </div>
 
@@ -114,7 +135,9 @@ export default function BudgetScreen({
                                 <Calendar className={styles.detailIcon} />
                             </div>
                             <div>
-                                <p className={styles.detailText}>{totalNights} noites em {destination}</p>
+                                <p className={styles.detailText}>
+                                    {totalNights || hotel?.nights || 0} noites em {destination}
+                                </p>
                                 <p className={styles.detailSubtext}>{formatPeriod()}</p>
                             </div>
                         </div>
@@ -126,45 +149,13 @@ export default function BudgetScreen({
                             </div>
                             <div>
                                 <p className={styles.detailText}>Pacote completo</p>
-                                <p className={styles.detailSubtext}>
-                                    Voos + Hotel {hotel?.mealPlan ? `+ ${hotel.mealPlan}` : ''}
-                                </p>
+                                <p className={styles.detailSubtext}>{getPackageText()}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Package Value Card */}
-                <div className={styles.card}>
-                    <div className={styles.priceRow}>
-                        <div>
-                            <p className={styles.priceLabel}>Pacote {destination}</p>
-                            <p className={styles.priceDescription}>{totalNights} noites • {passengers}</p>
-                        </div>
-                        <span className={styles.priceValue}>{totalPrice}</span>
-                    </div>
-                </div>
-
-                {/* Optional Items - só mostra se houver */}
-                {additionalItems.length > 0 && (
-                    <div className={styles.card}>
-                        <h2 className={styles.cardTitle}>Itens adicionais</h2>
-
-                        {additionalItems.map((item, index) => (
-                            <div key={index} className={styles.additionalItem}>
-                                <div>
-                                    <p className={styles.additionalName}>{item.name}</p>
-                                    <p className={styles.additionalDetails}>
-                                        {item.quantity}{item.description ? ` • ${item.description}` : ''}
-                                    </p>
-                                </div>
-                                <span className={styles.additionalPrice}>{item.price}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Total Price Card */}
+                {/* Total Price Card - ÚNICO card de preço */}
                 <div className={styles.totalCard}>
                     <p className={styles.totalLabel}>Valor total</p>
                     <h1 className={styles.totalValue}>
@@ -211,16 +202,35 @@ export default function BudgetScreen({
                     </div>
                 </div>
 
-                {/* CTA Button */}
-                <button onClick={onConfirm} className={styles.ctaButton}>
-                    Confirmar e pagar
-                </button>
+                {/* Optional Items - só mostra se houver */}
+                {additionalItems.length > 0 && (
+                    <div className={styles.card}>
+                        <h2 className={styles.cardTitle}>Itens adicionais</h2>
+
+                        {additionalItems.map((item, index) => (
+                            <div key={index} className={styles.additionalItem}>
+                                <div>
+                                    <p className={styles.additionalName}>{item.name}</p>
+                                    <p className={styles.additionalDetails}>
+                                        {item.quantity}{item.description ? ` • ${item.description}` : ''}
+                                    </p>
+                                </div>
+                                <span className={styles.additionalPrice}>{item.price}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Footer Text */}
                 <p className={styles.footerText}>
-                    Ao confirmar, você concorda com os termos de serviço e política de cancelamento do DSC TRAVEL
+                    Ao confirmar, você concorda com os termos de serviço e política de cancelamento da DSC Travel
                 </p>
             </div>
+
+            {/* CTA Button - FORA do scroll, fixo no bottom */}
+            <button onClick={onConfirm} className={styles.ctaButton}>
+                Confirmar e pagar
+            </button>
         </div>
     )
 }

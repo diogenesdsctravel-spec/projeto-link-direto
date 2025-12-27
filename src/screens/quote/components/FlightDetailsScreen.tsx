@@ -6,6 +6,8 @@
  * - Bagagem por trecho
  * - Tempo de conexão
  * - Resumo da viagem
+ * 
+ * ⚠️ PADRÃO: Botão CTA fixo no bottom, scroll não vaza
  */
 
 import { ArrowLeft, Clock, ChevronDown, Briefcase, Check, X, ArrowRight, Backpack } from 'lucide-react'
@@ -29,10 +31,10 @@ export default function FlightDetailsScreen({
     baggage,
     origin,
     destination,
-    title = "Detalhes do voo",
+    title = "Detalhes do voo de ida",
     onBack,
     onNext,
-    nextButtonText = "Ver voo de volta"
+    nextButtonText = "Ver transfer de chegada"
 }: FlightDetailsScreenProps) {
     const [expandedFlight, setExpandedFlight] = useState<number | null>(null)
 
@@ -52,7 +54,7 @@ export default function FlightDetailsScreen({
                 <p className={styles.headerSubtitle}>{origin} → {destination}</p>
             </div>
 
-            {/* Content */}
+            {/* Content - Área de scroll */}
             <div className={styles.content}>
                 {flight.segments.map((segment, index) => (
                     <div key={index}>
@@ -218,13 +220,13 @@ export default function FlightDetailsScreen({
                         <span className={styles.summaryValue}>{estimatedDistance}</span>
                     </div>
                 </div>
-
-                {/* CTA Button */}
-                <button onClick={onNext} className={styles.ctaButton}>
-                    <span>{nextButtonText}</span>
-                    <ArrowRight className={styles.ctaIcon} />
-                </button>
             </div>
+
+            {/* CTA Button - FORA do scroll, fixo no bottom */}
+            <button onClick={onNext} className={styles.ctaButton}>
+                <span>{nextButtonText}</span>
+                <ArrowRight className={styles.ctaIcon} />
+            </button>
         </div>
     )
 }

@@ -1,15 +1,21 @@
 /* BudgetScreen.module.css - Resumo do Pacote e Pagamento */
 
+/* Container principal */
 .container {
-    min-height: 100vh;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+    overflow: hidden;
     background: #f9fafb;
-    scroll-snap-align: start;
 }
 
 /* Header */
 .header {
     background: #09077d;
-    padding: 64px 24px 32px 24px;
+    padding: 24px 24px 32px 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
 }
 
 .backButton {
@@ -20,52 +26,40 @@
     background: none;
     border: none;
     cursor: pointer;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     font-size: 16px;
+    padding: 0;
 }
 
 .backIcon {
-    width: 24px;
-    height: 24px;
-}
-
-.headerTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
+    width: 20px;
+    height: 20px;
 }
 
 .headerTitle {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 28px;
+    font-weight: 700;
     color: #ffffff;
-    margin: 0;
-}
-
-.stepBadge {
-    background: #50cfad;
-    padding: 4px 12px;
-    border-radius: 50px;
-}
-
-.stepText {
-    font-size: 14px;
-    font-weight: 600;
-    color: #09077d;
+    margin: 0 0 4px 0;
 }
 
 .headerSubtitle {
-    font-size: 15px;
+    font-size: 16px;
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
 }
 
-/* Content */
+/* Content - Área de scroll */
 .content {
+    position: relative;
+    z-index: 2;
+    height: calc(100vh - 220px);
+    height: calc(100dvh - 220px);
+    overflow-y: auto;
     padding: 24px;
-    padding-bottom: 32px;
+    padding-top: 16px;
     margin-top: -16px;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Cards */
@@ -74,7 +68,7 @@
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .cardTitle {
@@ -88,7 +82,7 @@
 .detailsList {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .detailItem {
@@ -98,125 +92,72 @@
 }
 
 .detailIconWrapper {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: rgba(80, 207, 173, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .detailIcon {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     color: #50cfad;
 }
 
 .detailText {
-    font-size: 15px;
-    color: #1f2937;
+    font-size: 16px;
+    font-weight: 500;
+    color: #111827;
     margin: 0;
 }
 
 .detailSubtext {
-    font-size: 12px;
-    color: #6b7280;
-    margin: 2px 0 0 0;
-}
-
-/* Package Price Row */
-.priceRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-}
-
-.priceLabel {
     font-size: 14px;
     color: #6b7280;
-    margin: 0 0 4px 0;
-}
-
-.priceDescription {
-    font-size: 16px;
-    color: #1f2937;
-    margin: 0;
-}
-
-.priceValue {
-    font-size: 24px;
-    font-weight: 600;
-    color: #09077d;
-}
-
-/* Additional Items */
-.additionalItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.additionalItem:last-child {
-    border-bottom: none;
-}
-
-.additionalName {
-    font-size: 15px;
-    color: #1f2937;
-    margin: 0 0 4px 0;
-}
-
-.additionalDetails {
-    font-size: 12px;
-    color: #6b7280;
-    margin: 0;
-}
-
-.additionalPrice {
-    font-size: 15px;
-    font-weight: 500;
-    color: #1f2937;
+    margin: 4px 0 0 0;
 }
 
 /* Total Price Card */
 .totalCard {
     background: #09077d;
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 28px 24px;
     margin-bottom: 16px;
-    box-shadow: 0 4px 20px rgba(9, 7, 125, 0.3);
+    box-shadow: 0 4px 20px rgba(9, 7, 125, 0.25);
 }
 
 .totalLabel {
     text-align: center;
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.7);
     margin: 0 0 8px 0;
 }
 
 .totalValue {
     text-align: center;
-    font-size: 48px;
-    font-weight: 600;
+    font-size: 44px;
+    font-weight: 700;
     color: #ffffff;
     margin: 0 0 12px 0;
+    letter-spacing: -1px;
 }
 
 .installmentText {
     text-align: center;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.9);
-    margin: 0 0 16px 0;
+    margin: 0 0 20px 0;
 }
 
 /* Payment Options Box */
 .paymentOptions {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 16px;
 }
@@ -229,36 +170,39 @@
 
 .paymentRowMain {
     color: #ffffff;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .paymentRowSecondary {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 12px;
-    margin-top: 8px;
+    font-size: 13px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .paymentLabel {
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .paymentValue {
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Included Items Card */
 .includedCard {
-    background: rgba(80, 207, 173, 0.1);
+    background: rgba(80, 207, 173, 0.08);
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 16px;
+    border: 1px solid rgba(80, 207, 173, 0.2);
 }
 
 .includedTitle {
     font-size: 16px;
     font-weight: 600;
     color: #09077d;
-    margin: 0 0 12px 0;
+    margin: 0 0 16px 0;
 }
 
 .includedGrid {
@@ -274,19 +218,66 @@
 }
 
 .includedIcon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     color: #50cfad;
+    flex-shrink: 0;
 }
 
 .includedText {
-    font-size: 13px;
+    font-size: 14px;
     color: #374151;
 }
 
-/* CTA Button */
+/* Additional Items */
+.additionalItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.additionalItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.additionalName {
+    font-size: 15px;
+    font-weight: 500;
+    color: #111827;
+    margin: 0 0 4px 0;
+}
+
+.additionalDetails {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.additionalPrice {
+    font-size: 15px;
+    font-weight: 600;
+    color: #09077d;
+}
+
+/* Footer Text */
+.footerText {
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+    padding: 0 16px;
+    margin: 8px 0 0 0;
+    line-height: 1.5;
+}
+
+/* CTA Button - FIXO no bottom */
 .ctaButton {
-    width: 100%;
+    position: absolute;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 24px;
+    right: 24px;
     padding: 18px 24px;
     border-radius: 16px;
     border: none;
@@ -296,19 +287,5 @@
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(80, 207, 173, 0.3);
-    margin-bottom: 16px;
-    transition: opacity 0.2s ease;
-}
-
-.ctaButton:active {
-    opacity: 0.9;
-}
-
-/* Footer Text */
-.footerText {
-    text-align: center;
-    font-size: 12px;
-    color: #6b7280;
-    padding: 0 16px;
-    margin: 0;
+    z-index: 50;
 }

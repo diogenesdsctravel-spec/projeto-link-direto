@@ -17,8 +17,9 @@ export interface Destination {
     heroImageUrl: string | null
     heroHeadline: string | null
     heroSubtext: string | null
-    coverImageUrl: string | null      // NOVO: foto de capa (QuoteIndex)
-    coverSubtitle: string | null      // NOVO: subtítulo da capa
+    coverImageUrl: string | null        // Foto de capa (Tela 1 - QuoteIndex)
+    coverSubtitle: string | null        // Subtítulo da capa
+    heroScreenImageUrl: string | null   // Foto do destino (Tela 4 - HeroScreen)
     experiences: Experience[]
     createdAt: string
 }
@@ -110,8 +111,9 @@ export async function saveDestination(destination: Partial<Destination> & { dest
             hero_image_url: destination.heroImageUrl || null,
             hero_headline: destination.heroHeadline || null,
             hero_subtext: destination.heroSubtext || null,
-            cover_image_url: destination.coverImageUrl || null,      // NOVO
-            cover_subtitle: destination.coverSubtitle || null,        // NOVO
+            cover_image_url: destination.coverImageUrl || null,
+            cover_subtitle: destination.coverSubtitle || null,
+            hero_screen_image_url: destination.heroScreenImageUrl || null,  // NOVO
             experiences: destination.experiences || [],
             updated_at: new Date().toISOString()
         }
@@ -348,6 +350,9 @@ export async function checkTemplateExists(
         if (!destination.coverImageUrl) {
             missingItems.push("destination_cover")
         }
+        if (!destination.heroScreenImageUrl) {
+            missingItems.push("destination_hero_screen")
+        }
     }
 
     if (!hotel) {
@@ -377,8 +382,9 @@ function mapDestination(data: any): Destination {
         heroImageUrl: data.hero_image_url,
         heroHeadline: data.hero_headline,
         heroSubtext: data.hero_subtext,
-        coverImageUrl: data.cover_image_url,      // NOVO
-        coverSubtitle: data.cover_subtitle,        // NOVO
+        coverImageUrl: data.cover_image_url,
+        coverSubtitle: data.cover_subtitle,
+        heroScreenImageUrl: data.hero_screen_image_url,  // NOVO
         experiences: data.experiences || [],
         createdAt: data.created_at
     }

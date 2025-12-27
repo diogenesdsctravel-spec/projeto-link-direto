@@ -4,7 +4,7 @@
  * Exibe resumo do voo de volta com dados dinâmicos
  */
 
-import { Plane, MapPin, Calendar, Briefcase, Backpack } from 'lucide-react'
+import { Plane, MapPin, Calendar, Briefcase, Backpack, ArrowLeft } from 'lucide-react'
 import styles from './ReturnFlightOverview.module.css'
 import type { FlightLeg, BaggageInfo } from '../../../types/extractedQuoteData'
 
@@ -15,6 +15,7 @@ interface ReturnFlightOverviewProps {
     baggage: BaggageInfo
     returnDate: string
     backgroundImage?: string
+    onBack?: () => void
     onViewDetails: () => void
 }
 
@@ -24,7 +25,8 @@ export default function ReturnFlightOverview({
     flight,
     baggage,
     returnDate,
-    backgroundImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    backgroundImage = "https://i.pinimg.com/736x/c4/3d/5f/c43d5f9ba78b6c2b140945915ea66c01.jpg",
+    onBack,
     onViewDetails
 }: ReturnFlightOverviewProps) {
     // Pegar primeiro e último segmento
@@ -54,6 +56,13 @@ export default function ReturnFlightOverview({
 
             {/* Overlay */}
             <div className={styles.overlay} />
+
+            {/* Botão voltar */}
+            {onBack && (
+                <button className={styles.backButton} onClick={onBack}>
+                    <ArrowLeft size={20} />
+                </button>
+            )}
 
             {/* Content */}
             <div className={styles.content}>
