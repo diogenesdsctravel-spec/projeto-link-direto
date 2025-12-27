@@ -1,0 +1,18 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "netlify/functions"
+
+# Redirect para Open Graph preview (WhatsApp)
+[[redirects]]
+  from = "/p/*"
+  to = "/.netlify/functions/og-preview?id=:splat"
+  status = 200
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
