@@ -1,0 +1,6 @@
+# Netlify Redirects
+# Links de preview para WhatsApp (Open Graph dinâmico)
+/p/:id  /.netlify/functions/og-preview?id=:id  200
+
+# SPA fallback - todas outras rotas vão para index.html
+/*  /index.html  200
